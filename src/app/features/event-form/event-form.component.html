@@ -1,0 +1,105 @@
+<div class="event-form-page">
+  <app-header />
+
+  <main class="event-form-page__main">
+    <article class="event-form-card">
+      <header class="event-form-card__header">
+        <p class="event-form-card__provider">{{ context.providerLine }}</p>
+        <div class="event-form-card__timestamp">
+          <span>{{ context.timestamp }}</span>
+          <button type="button" aria-label="Edit timestamp">
+            <mat-icon>edit</mat-icon>
+          </button>
+        </div>
+      </header>
+
+      <form class="event-form-card__form" [formGroup]="form" (ngSubmit)="createEvent()">
+        <div class="field-group">
+          <label class="field-label" for="fullName">Patient full name</label>
+          <mat-form-field appearance="outline" class="field-full" subscriptSizing="dynamic">
+            <input matInput id="fullName" formControlName="fullName" />
+          </mat-form-field>
+        </div>
+
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label" for="dateOfBirth">Date of birth</label>
+            <mat-form-field appearance="outline" class="field-full" subscriptSizing="dynamic">
+              <input matInput id="dateOfBirth" formControlName="dateOfBirth" />
+            </mat-form-field>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="patientId">Patient ID</label>
+            <mat-form-field appearance="outline" class="field-full" subscriptSizing="dynamic">
+              <input matInput id="patientId" formControlName="patientId" />
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="eventType">Event type</label>
+          <mat-form-field appearance="outline" class="field-full field-with-icons" subscriptSizing="dynamic">
+            <mat-icon matPrefix>search</mat-icon>
+            <input matInput id="eventType" formControlName="eventType" placeholder="Event type..." />
+            <button mat-icon-button matSuffix type="button" aria-label="Voice input">
+              <mat-icon>mic</mat-icon>
+            </button>
+          </mat-form-field>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="visitReasons">Reasons for visit</label>
+          <mat-form-field appearance="outline" class="field-full field-with-icons" subscriptSizing="dynamic">
+            <input matInput id="visitReasons" formControlName="visitReasons" placeholder="Reasons for visit..." />
+            <button mat-icon-button matSuffix type="button" aria-label="Voice input">
+              <mat-icon>mic</mat-icon>
+            </button>
+          </mat-form-field>
+        </div>
+
+        <fieldset class="status-group">
+          <legend class="field-label">Status</legend>
+          <mat-radio-group formControlName="status" class="status-group__options">
+            <mat-radio-button value="draft">Draft</mat-radio-button>
+            <mat-radio-button value="ready">Ready</mat-radio-button>
+            <mat-radio-button value="approved">Approved</mat-radio-button>
+          </mat-radio-group>
+        </fieldset>
+
+        <div class="readonly-row">
+          <span class="readonly-row__label">Doctor:</span>
+          <span class="readonly-row__value">{{ context.doctorName }}</span>
+        </div>
+
+        <div class="readonly-row">
+          <span class="readonly-row__label">Appointment date and time:</span>
+          <span class="readonly-row__value readonly-row__value--editable">
+            {{ context.timestamp }}
+            <button type="button" aria-label="Edit appointment time">
+              <mat-icon>edit</mat-icon>
+            </button>
+          </span>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="additionalNotes">Additional notes</label>
+          <mat-form-field appearance="outline" class="field-full field-textarea" subscriptSizing="dynamic">
+            <textarea matInput id="additionalNotes" formControlName="additionalNotes" rows="5"></textarea>
+            <button mat-icon-button matSuffix type="button" class="textarea-mic" aria-label="Voice input">
+              <mat-icon>mic</mat-icon>
+            </button>
+          </mat-form-field>
+        </div>
+
+        <footer class="event-form-card__actions">
+          <button mat-flat-button color="primary" type="submit" class="btn-create">
+            Create event
+          </button>
+          <button mat-stroked-button type="button" class="btn-close" (click)="close()">
+            Close
+          </button>
+        </footer>
+      </form>
+    </article>
+  </main>
+</div>

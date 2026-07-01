@@ -1,0 +1,24 @@
+<section class="patients-card">
+  <h2 class="patients-card__title">Recent patients</h2>
+
+  <mat-form-field appearance="outline" class="patients-card__search" subscriptSizing="dynamic">
+    <mat-icon matPrefix>search</mat-icon>
+    <input
+      matInput
+      placeholder="Search patient name or personal ID..."
+      [value]="searchQuery()"
+      (input)="onSearch($any($event.target).value)"
+    />
+  </mat-form-field>
+
+  <ul class="patients-card__list">
+    @for (patient of filteredPatients(); track patient.id) {
+      <li>
+        <button type="button" class="patients-card__row">
+          <mat-icon>chevron_right</mat-icon>
+          <span>{{ patient.name }} – {{ patient.personalId }}</span>
+        </button>
+      </li>
+    }
+  </ul>
+</section>

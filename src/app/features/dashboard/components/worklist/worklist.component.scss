@@ -1,0 +1,64 @@
+:host {
+  display: block;
+}
+
+.worklist-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.08);
+  overflow: hidden;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 20px 12px;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #111827;
+  }
+
+  &__calendar-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: none;
+    background: #eff6ff;
+    color: #1d6fd8;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  &__nav {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px 12px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  &__nav-link {
+    border: none;
+    background: transparent;
+    color: #6b7280;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 4px 0;
+
+    &:hover {
+      color: #1d6fd8;
+    }
+  }
+}

@@ -1,0 +1,43 @@
+:host {
+  display: block;
+}
+
+.dashboard-page {
+  min-height: 100vh;
+  background: #f3f4f6;
+
+  &__main {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 20px 24px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+    gap: 20px;
+    align-items: start;
+  }
+
+  &__left,
+  &__right {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .dashboard-page__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboard-page__main {
+    padding: 16px;
+  }
+}

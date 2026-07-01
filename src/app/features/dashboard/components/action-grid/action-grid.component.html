@@ -1,0 +1,17 @@
+<section class="action-grid-card">
+  <div class="action-grid-card__grid">
+    @for (action of actions(); track action.label) {
+      <button type="button" class="action-grid-card__item">
+        <span class="action-grid-card__icon">
+          <mat-icon>{{ action.icon }}</mat-icon>
+        </span>
+        <span class="action-grid-card__label">{{ action.label }}</span>
+      </button>
+    }
+    <button type="button" class="action-grid-card__item action-grid-card__item--add" aria-label="Add action">
+      <span class="action-grid-card__icon action-grid-card__icon--add">
+        <mat-icon>add</mat-icon>
+      </span>
+    </button>
+  </div>
+</section>

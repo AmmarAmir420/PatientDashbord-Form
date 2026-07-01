@@ -1,0 +1,24 @@
+<section class="worklist-card">
+  <header class="worklist-card__header">
+    <h2 class="worklist-card__title">Worklist</h2>
+    <button type="button" class="worklist-card__calendar-btn">
+      <mat-icon>calendar_month</mat-icon>
+      Calendar
+    </button>
+  </header>
+
+  <nav class="worklist-card__nav">
+    <button type="button" class="worklist-card__nav-link">&lt; Yesterday's list</button>
+    <button type="button" class="worklist-card__nav-link">Tomorrow's list &gt;</button>
+  </nav>
+
+  <div class="worklist-card__list">
+    @for (appointment of appointments(); track appointment.id) {
+      <app-worklist-item
+        [appointment]="appointment"
+        [expanded]="isExpanded(appointment.id)"
+        (expandedChange)="setExpanded(appointment.id, $event)"
+      />
+    }
+  </div>
+</section>

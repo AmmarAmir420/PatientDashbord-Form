@@ -1,0 +1,49 @@
+<header class="app-header">
+  <div class="app-header__inner">
+    <div class="app-header__search">
+      <mat-form-field appearance="outline" class="search-field" subscriptSizing="dynamic">
+        <input matInput placeholder="Search keywords..." />
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </div>
+
+    <div class="app-header__actions">
+      <button mat-icon-button type="button" aria-label="Notifications">
+        <mat-icon>notifications_none</mat-icon>
+      </button>
+
+      <div class="profile-wrapper">
+        <button
+          mat-button
+          type="button"
+          class="profile-trigger"
+          [matMenuTriggerFor]="profileMenu"
+          [class.profile-trigger--open]="profileMenuOpen()"
+          (menuOpened)="profileMenuOpen.set(true)"
+          (menuClosed)="profileMenuOpen.set(false)"
+        >
+          <span class="profile-trigger__avatar">{{ user().avatarInitials }}</span>
+          <span class="profile-trigger__name">{{ user().fullName }}</span>
+          <mat-icon class="profile-trigger__chevron">expand_more</mat-icon>
+        </button>
+
+        <mat-menu #profileMenu="matMenu" class="profile-menu-panel" xPosition="before">
+          <div class="profile-menu" (click)="$event.stopPropagation()">
+            <div class="profile-menu__identity">
+              <p class="profile-menu__name">{{ user().fullName }}</p>
+              <p class="profile-menu__role">{{ user().role }}</p>
+              <p class="profile-menu__id">{{ user().employeeId }}</p>
+            </div>
+            <div class="profile-menu__divider"></div>
+            @for (item of menuItems; track item.label) {
+              <button mat-menu-item type="button" class="profile-menu__item">
+                <mat-icon>{{ item.icon }}</mat-icon>
+                <span>{{ item.label }}</span>
+              </button>
+            }
+          </div>
+        </mat-menu>
+      </div>
+    </div>
+  </div>
+</header>

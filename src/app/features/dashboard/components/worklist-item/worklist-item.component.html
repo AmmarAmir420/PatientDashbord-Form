@@ -1,0 +1,35 @@
+<div class="worklist-item" [class.worklist-item--expanded]="expanded()">
+  <div class="worklist-item__row">
+    <button
+      type="button"
+      class="worklist-item__toggle"
+      (click)="toggleExpanded()"
+      [attr.aria-expanded]="expanded()"
+      [attr.aria-label]="expanded() ? 'Close message' : 'Open message'"
+    >
+      <mat-icon>{{ expanded() ? 'remove' : 'add' }}</mat-icon>
+    </button>
+
+    <div class="worklist-item__meta">
+      <span class="worklist-item__time">{{ appointment().time }}</span>
+      <span class="worklist-item__separator">-</span>
+      <span class="worklist-item__patient">{{ appointment().patientName }}</span>
+      <span class="worklist-item__separator">-</span>
+      <span class="worklist-item__id">{{ appointment().patientId }}</span>
+      <span class="worklist-item__separator">|</span>
+      <span class="worklist-item__type">{{ appointment().appointmentType }}</span>
+    </div>
+
+    <div class="worklist-item__actions">
+      <button type="button" class="btn btn--dark">Open telehealth visit</button>
+      <button type="button" class="btn btn--primary">Open patient</button>
+      <button type="button" class="btn btn--light">Messages</button>
+    </div>
+  </div>
+
+  @if (expanded() && appointment().patientMessage) {
+    <div class="worklist-item__message">
+      <p>{{ appointment().patientMessage }}</p>
+    </div>
+  }
+</div>
