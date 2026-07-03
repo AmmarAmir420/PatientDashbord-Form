@@ -6,15 +6,15 @@
     <input
       matInput
       placeholder="Search patient name or personal ID..."
-      [value]="searchQuery()"
+      [value]="localSearchQuery()"
       (input)="onSearch($any($event.target).value)"
     />
   </mat-form-field>
 
   <ul class="patients-card__list">
-    @for (patient of filteredPatients(); track patient.id) {
+    @for (patient of patients(); track patient.id) {
       <li>
-        <button type="button" class="patients-card__row">
+        <button type="button" class="patients-card__row" (click)="openPatient(patient)">
           <mat-icon>chevron_right</mat-icon>
           <span>{{ patient.name }} – {{ patient.personalId }}</span>
         </button>

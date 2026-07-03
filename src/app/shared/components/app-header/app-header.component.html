@@ -2,13 +2,23 @@
   <div class="app-header__inner">
     <div class="app-header__search">
       <mat-form-field appearance="outline" class="search-field" subscriptSizing="dynamic">
-        <input matInput placeholder="Search keywords..." />
+        <input
+          matInput
+          placeholder="Search keywords..."
+          [value]="searchQuery()"
+          (input)="onSearch($any($event.target).value)"
+        />
         <mat-icon matSuffix>search</mat-icon>
       </mat-form-field>
     </div>
 
     <div class="app-header__actions">
-      <button mat-icon-button type="button" aria-label="Notifications">
+      <button
+        mat-icon-button
+        type="button"
+        aria-label="Notifications"
+        (click)="onNotificationClick()"
+      >
         <mat-icon>notifications_none</mat-icon>
       </button>
 
@@ -36,7 +46,12 @@
             </div>
             <div class="profile-menu__divider"></div>
             @for (item of menuItems; track item.label) {
-              <button mat-menu-item type="button" class="profile-menu__item">
+              <button
+                mat-menu-item
+                type="button"
+                class="profile-menu__item"
+                (click)="onProfileAction(item.action)"
+              >
                 <mat-icon>{{ item.icon }}</mat-icon>
                 <span>{{ item.label }}</span>
               </button>

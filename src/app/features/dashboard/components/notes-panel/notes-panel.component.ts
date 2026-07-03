@@ -1,8 +1,7 @@
-import { Component, input } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 
-import { STICKY_NOTES } from '../../../../shared/data/dashboard.data';
-import { StickyNote } from '../../../../shared/models';
+import { HealthcareStoreService } from '../../../../core/services/healthcare-store.service';
 
 @Component({
   selector: 'app-notes-panel',
@@ -11,5 +10,5 @@ import { StickyNote } from '../../../../shared/models';
   styleUrl: './notes-panel.component.scss',
 })
 export class NotesPanelComponent {
-  readonly notes = input<StickyNote[]>(STICKY_NOTES);
+  readonly store = inject(HealthcareStoreService);
 }

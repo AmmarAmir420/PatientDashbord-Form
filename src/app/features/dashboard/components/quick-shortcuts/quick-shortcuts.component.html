@@ -1,6 +1,6 @@
 <nav class="shortcuts" aria-label="Quick actions">
   @for (shortcut of shortcuts(); track shortcut.label) {
-    <button type="button" class="shortcuts__item">
+    <button type="button" class="shortcuts__item" (click)="onShortcutClick(shortcut)">
       <span
         class="shortcuts__icon-wrap"
         [matBadge]="shortcut.badge"

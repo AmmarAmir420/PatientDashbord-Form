@@ -2,21 +2,21 @@
   <header class="notes-card__header">
     <h2 class="notes-card__title">Notes</h2>
     <div class="notes-card__tools">
-      <button type="button" aria-label="Download notes">
+      <button type="button" aria-label="Download notes" (click)="store.downloadNotes()">
         <mat-icon>download</mat-icon>
       </button>
-      <button type="button" aria-label="Delete notes">
+      <button type="button" aria-label="Delete notes" (click)="store.deleteNotes()">
         <mat-icon>delete_outline</mat-icon>
       </button>
     </div>
   </header>
 
   <div class="notes-card__grid">
-    <button type="button" class="notes-card__add" aria-label="Add note">
+    <button type="button" class="notes-card__add" aria-label="Add note" (click)="store.addNote()">
       <mat-icon>add</mat-icon>
     </button>
 
-    @for (note of notes(); track note.id) {
+    @for (note of store.notes(); track note.id) {
       <article class="notes-card__note">
         <p>{{ note.preview }}</p>
       </article>

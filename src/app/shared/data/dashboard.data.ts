@@ -22,13 +22,13 @@ export const PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
 ];
 
 export const QUICK_SHORTCUTS: QuickShortcut[] = [
-  { label: 'Patient review', icon: 'create_new_folder' },
-  { label: 'Patient messages', icon: 'smartphone', badge: 3 },
-  { label: 'Doctor messages', icon: 'forum' },
-  { label: 'Working hours', icon: 'schedule' },
-  { label: 'Calendar', icon: 'calendar_month' },
-  { label: 'Settings', icon: 'settings' },
-  { label: 'Health portal', icon: 'health_and_safety' },
+  { label: 'Patient review', icon: 'create_new_folder', action: 'patient-review' },
+  { label: 'Patient messages', icon: 'smartphone', badge: 3, action: 'patient-messages' },
+  { label: 'Doctor messages', icon: 'forum', action: 'doctor-messages' },
+  { label: 'Working hours', icon: 'schedule', action: 'working-hours' },
+  { label: 'Calendar', icon: 'calendar_month', action: 'calendar' },
+  { label: 'Settings', icon: 'settings', action: 'settings' },
+  { label: 'Health portal', icon: 'health_and_safety', action: 'health-portal' },
 ];
 
 export const WORKLIST_APPOINTMENTS: WorklistAppointment[] = [
@@ -65,13 +65,48 @@ export const WORKLIST_APPOINTMENTS: WorklistAppointment[] = [
   },
 ];
 
+export const WORKLIST_YESTERDAY: WorklistAppointment[] = [
+  {
+    id: 'y1',
+    time: '02:00 PM',
+    patientName: 'Oliver Wilson',
+    patientId: '240545-123Y',
+    appointmentType: 'Follow-up visit',
+    patientMessage: 'Follow-up on blood pressure medication.',
+  },
+  {
+    id: 'y2',
+    time: '03:30 PM',
+    patientName: 'Eva Cohen',
+    patientId: '240545-123Y',
+    appointmentType: 'Telehealth visit',
+  },
+];
+
+export const WORKLIST_TOMORROW: WorklistAppointment[] = [
+  {
+    id: 't1',
+    time: '08:30 AM',
+    patientName: 'Matt Newman',
+    patientId: '240545-123Y',
+    appointmentType: 'In-person visit',
+  },
+  {
+    id: 't2',
+    time: '01:00 PM',
+    patientName: 'Karl Lake',
+    patientId: '240545-123Y',
+    appointmentType: 'Telehealth visit',
+  },
+];
+
 export const CLINICAL_ACTIONS: ClinicalAction[] = [
-  { label: 'Hospital referral', icon: 'local_hospital' },
-  { label: 'Lab order', icon: 'science' },
-  { label: 'Certificates', icon: 'description' },
-  { label: 'Prescription', icon: 'medication' },
-  { label: 'Imaging', icon: 'image_search' },
-  { label: 'Medication list', icon: 'medication' },
+  { label: 'Hospital referral', icon: 'local_hospital', eventType: 'Hospital referral' },
+  { label: 'Lab order', icon: 'science', eventType: 'Lab order' },
+  { label: 'Certificates', icon: 'description', eventType: 'Certificate' },
+  { label: 'Prescription', icon: 'medication', eventType: 'Prescription' },
+  { label: 'Imaging', icon: 'image_search', eventType: 'Imaging' },
+  { label: 'Medication list', icon: 'medication', eventType: 'Medication list' },
 ];
 
 export const RECENT_PATIENTS: RecentPatient[] = [

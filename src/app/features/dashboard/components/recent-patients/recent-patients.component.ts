@@ -1,9 +1,9 @@
-import { Component, input, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 
-import { RECENT_PATIENTS } from '../../../../shared/data/dashboard.data';
+import { HealthcareStoreService } from '../../../../core/services/healthcare-store.service';
 import { RecentPatient } from '../../../../shared/models';
 
 @Component({
@@ -13,23 +13,30 @@ import { RecentPatient } from '../../../../shared/models';
   styleUrl: './recent-patients.component.scss',
 })
 export class RecentPatientsComponent {
-  readonly patients = input<RecentPatient[]>(RECENT_PATIENTS);
-  readonly searchQuery = signal('');
+  private readonly store = inject(HealthcareStoreService);
 
-  filteredPatients(): RecentPatient[] {
-    const query = this.searchQuery().trim().toLowerCase();
+  readonly localSearchQuery = signal('');
+
+  readonly patients = computed(() => {
+    const query = this.localSearchQuery().trim().toLowerCase();
+    const patients = this.store.recentPatients();
+
     if (!query) {
-      return this.patients();
+      return patients;
     }
 
-    return this.patients().filter(
+    return patients.filter(
       (patient) =>
         patient.name.toLowerCase().includes(query) ||
         patient.personalId.toLowerCase().includes(query),
     );
-  }
+  });
 
   onSearch(value: string): void {
-    this.searchQuery.set(value);
+    this.localSearchQuery.set(value);
+  }
+
+  openPatient(patient: RecentPatient): void {
+    this.store.openRecentPatient(patient);
   }
 }

@@ -1,6 +1,7 @@
-import { Component, input } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 
+import { HealthcareStoreService } from '../../../../core/services/healthcare-store.service';
 import { CLINICAL_ACTIONS } from '../../../../shared/data/dashboard.data';
 import { ClinicalAction } from '../../../../shared/models';
 
@@ -11,5 +12,15 @@ import { ClinicalAction } from '../../../../shared/models';
   styleUrl: './action-grid.component.scss',
 })
 export class ActionGridComponent {
-  readonly actions = input<ClinicalAction[]>(CLINICAL_ACTIONS);
+  private readonly store = inject(HealthcareStoreService);
+
+  readonly actions = CLINICAL_ACTIONS;
+
+  openAction(action: ClinicalAction): void {
+    this.store.openClinicalAction(action.eventType);
+  }
+
+  createCustomAction(): void {
+    this.store.openEventForm();
+  }
 }
