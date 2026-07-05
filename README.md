@@ -1,59 +1,56 @@
-# UiScreenApp
+# Healthcare Dashboard UI
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.27.
+Angular application recreating two healthcare dashboard screens using a component-based architecture, **Angular Material**, **Tailwind CSS**, and static mock data (no backend).
 
-## Development server
+## Screens
 
-To start a local development server, run:
+1. **Dashboard** (`/`) — header search, quick shortcuts, worklist, clinical actions, recent patients, and sticky notes.
+2. **Patient visit** (`/patient-visit/new`) — create and view patient visit forms with reactive validation, appointment date/time picker, and read-only detail mode from worklist/recent patients.
 
-```bash
-ng serve
-```
+## Tech stack
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+- Angular 19 (standalone components, signals, lazy routes)
+- Angular Material (form fields, datepicker, menu, radio, icons)
+- Tailwind CSS v4 (layout, spacing, responsive design)
+- RxJS + typed reactive forms
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Getting started
 
 ```bash
-ng generate --help
+npm install
+npm start
 ```
 
-## Building
+Open [http://localhost:4200](http://localhost:4200).
 
-To build the project run:
+### Other commands
 
 ```bash
-ng build
+npm run build          # Production build
+npm test               # Unit tests (Karma + Jasmine)
+npm test -- --watch=false --browsers=ChromeHeadless   # Single test run
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+## Project structure
 
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
+```
+src/app/
+├── core/           Constants, mocks, HealthcareStoreService (in-memory state)
+├── features/
+│   ├── dashboard/  Dashboard page and sub-components
+│   └── patient-visit/
+├── layouts/        Main layout, header, reusable UI components
+└── shared/         Enums, interfaces, utilities
 ```
 
-## Running end-to-end tests
+## AI assistance disclosure
 
-For end-to-end (e2e) testing, run:
+This project was developed with AI assistance as permitted by the assignment. The tool used and its purpose are listed below.
 
-```bash
-ng e2e
-```
+| Tool | Purpose |
+|------|---------|
+| **[Cursor](https://cursor.com)** (AI-assisted IDE) | Primary development environment. Used to scaffold the Angular project structure, generate and refactor components, implement responsive layouts, wire routing and state, fix bugs, remove duplicated code, and align UI details with the assignment reference (e.g. notification badge styling, search field layout). |
+| **Cursor Agent / Chat** | Used for iterative feature work: patient ID formatting, worklist sorting, create vs detail visit modes, code quality review against assignment requirements, and documentation (this README). |
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+All AI-generated code was reviewed and integrated into the final implementation. Business logic, component structure, and styling decisions were validated through manual review and local builds/tests.
 
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
