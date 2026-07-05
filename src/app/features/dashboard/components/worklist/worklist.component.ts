@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 
 import { UI_COPY } from '../../../../core/constants';
@@ -10,18 +10,24 @@ import { WorklistItemComponent } from '../worklist-item/worklist-item.component'
 @Component({
   selector: 'app-worklist',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MatIconModule, SectionHeaderComponent, UiCardComponent, WorklistItemComponent],  templateUrl: './worklist.component.html',
+  imports: [MatIconModule, SectionHeaderComponent, UiCardComponent, WorklistItemComponent],
+  templateUrl: './worklist.component.html',
 })
 export class WorklistComponent {
   readonly store = inject(HealthcareStoreService);
   readonly copy = UI_COPY;
   readonly WorklistDay = WorklistDay;
 
-  readonly worklistDayLabel: Record<WorklistDay, string> = {
-    [WorklistDay.Yesterday]: "Yesterday's list",
-    [WorklistDay.Today]: UI_COPY.worklist,
-    [WorklistDay.Tomorrow]: "Tomorrow's list",
-  };
+  readonly worklistTitle = computed(() => {
+    switch (this.store.worklistDay()) {
+      case WorklistDay.Yesterday:
+        return this.copy.yesterdayList;
+      case WorklistDay.Tomorrow:
+        return this.copy.tomorrowList;
+      default:
+        return this.copy.worklist;
+    }
+  });
 
   showPreviousList(): void {
     this.store.showPreviousWorklist();

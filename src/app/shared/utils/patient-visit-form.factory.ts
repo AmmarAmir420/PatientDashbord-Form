@@ -2,7 +2,7 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 
 import { VisitStatus } from '../enums/visit-status.enum';
 import { PatientVisitFormModel } from '../interfaces';
-import { formatDisplayDate, formatDisplayDateTime } from './date-format.utils';
+import { formatDisplayDate, formatDisplayDateTime, extractBasePatientId } from './date-format.utils';
 
 export type PatientVisitFormControls = {
   fullName: FormControl<string>;
@@ -36,7 +36,7 @@ export function getPatientVisitFormValue(form: PatientVisitFormGroup): PatientVi
   return {
     fullName: value.fullName,
     dateOfBirth: formatDisplayDate(value.dateOfBirth),
-    patientId: value.patientId,
+    patientId: extractBasePatientId(value.patientId),
     eventType: value.eventType,
     visitReasons: value.visitReasons,
     status: value.status,

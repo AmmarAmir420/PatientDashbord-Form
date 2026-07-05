@@ -125,3 +125,15 @@ app-root {
     width: min(100%, 320px);
   }
 }
+
+.appointment-datetime-menu {
+  max-width: none !important;
+}
+
+.appointment-datetime-menu .mat-mdc-menu-content {
+  padding: 0;
+}
+
+.appointment-datetime-panel .mat-calendar {
+  width: 320px;
+}

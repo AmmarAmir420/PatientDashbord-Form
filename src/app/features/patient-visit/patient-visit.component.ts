@@ -1,10 +1,12 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   DestroyRef,
   inject,
   OnInit,
   signal,
+  ViewChild,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
@@ -12,6 +14,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -33,6 +36,7 @@ import {
   createPatientVisitForm,
   formatDisplayDateTime,
   getPatientVisitFormValue,
+  extractBasePatientId,
   parseDateTimeValue,
   parseDateValue,
   PatientVisitFormGroup,
@@ -49,6 +53,7 @@ import {
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
+    MatMenuModule,
     MatRadioModule,
     MainLayoutComponent,
     LabelValueRowComponent,
@@ -70,10 +75,17 @@ export class PatientVisitComponent implements OnInit {
   readonly context = PATIENT_VISIT_CONTEXT_MOCK;
   readonly VisitStatus = VisitStatus;
   readonly submitted = signal(false);
-  readonly isViewMode = signal(false);
-  readonly isEditing = signal(false);
+  readonly formMode = signal<'create' | 'detail'>('create');
   readonly visitId = signal<string | null>(null);
   readonly maxBirthDate = startOfToday();
+
+  readonly isCreateMode = computed(() => this.formMode() === 'create');
+  readonly isDetailMode = computed(() => this.formMode() === 'detail');
+
+  readonly appointmentPickerDate = signal<Date | null>(null);
+  readonly appointmentPickerTime = signal('');
+
+  @ViewChild('appointmentMenuTrigger') appointmentMenuTrigger?: MatMenuTrigger;
 
   readonly form: PatientVisitFormGroup = createPatientVisitForm(this.fb);
 
@@ -87,20 +99,27 @@ export class PatientVisitComponent implements OnInit {
 
   ngOnInit(): void {
     this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
-      const viewMode = params.get('mode') === 'view';
-      this.isViewMode.set(viewMode);
-      this.isEditing.set(false);
+      const mode = params.get('mode');
       this.visitId.set(params.get('visitId'));
       this.submitted.set(false);
 
-      if (viewMode) {
+      if (mode === 'detail') {
+        this.formMode.set('detail');
         const patientId = params.get('patientId') ?? '';
         const fullName = params.get('fullName') ?? '';
-        this.patchFormFromModel(this.store.getPatientVisitViewModel(patientId, fullName));
-        this.setFormReadOnly(true);
+        const source = params.get('source') === 'worklist' ? 'worklist' : 'recent';
+        const model = this.store.getPatientVisitDetailModel(patientId, fullName, {
+          source,
+          visitId: this.visitId(),
+          eventType: params.get('eventType'),
+        });
+        this.patchFormFromModel(model);
+        this.applyDetailModeReadOnly();
         return;
       }
 
+      this.formMode.set('create');
+      this.form.enable({ emitEvent: false });
       this.patchFormFromModel({
         fullName: params.get('fullName') ?? '',
         dateOfBirth: params.get('dateOfBirth') ?? '',
@@ -111,60 +130,76 @@ export class PatientVisitComponent implements OnInit {
         additionalNotes: '',
         appointmentDateTime: this.context.timestamp,
       });
-      this.setFormReadOnly(false);
     });
-  }
-
-  isFormEditable(): boolean {
-    return !this.isViewMode() || this.isEditing();
-  }
-
-  primaryActionLabel(): string {
-    return this.isViewMode() ? this.copy.updateEvent : this.copy.createEvent;
   }
 
   private patchFormFromModel(model: PatientVisitFormModel): void {
-    this.form.patchValue({
-      fullName: model.fullName,
-      dateOfBirth: parseDateValue(model.dateOfBirth),
-      patientId: model.patientId,
-      eventType: model.eventType,
-      visitReasons: model.visitReasons,
-      status: model.status,
-      additionalNotes: model.additionalNotes,
-      appointmentAt: parseDateTimeValue(model.appointmentDateTime || this.context.timestamp),
-    });
+    this.form.patchValue(
+      {
+        fullName: model.fullName,
+        dateOfBirth: parseDateValue(model.dateOfBirth),
+        patientId: extractBasePatientId(model.patientId),
+        eventType: model.eventType,
+        visitReasons: model.visitReasons,
+        status: model.status,
+        additionalNotes: model.additionalNotes,
+        appointmentAt: parseDateTimeValue(model.appointmentDateTime || this.context.timestamp),
+      },
+      { emitEvent: false },
+    );
   }
 
-  private setFormReadOnly(readonly: boolean): void {
-    if (readonly) {
-      this.form.disable({ emitEvent: false });
-      return;
-    }
-
-    this.form.enable({ emitEvent: false });
+  private applyDetailModeReadOnly(): void {
+    this.form.disable({ emitEvent: false });
   }
 
-  appointmentTimeValue(): string {
-    return toTimeInputValue(this.form.controls.appointmentAt.value);
-  }
-
-  headerTimestamp(): string {
+  appointmentDateTimeDisplay(): string {
     return formatDisplayDateTime(this.form.controls.appointmentAt.value) || this.context.timestamp;
   }
 
-  onAppointmentTimeChange(time: string): void {
-    if (!this.isFormEditable()) {
+  openAppointmentDateTimePicker(): void {
+    if (!this.isCreateMode()) {
       return;
     }
 
-    const updated = applyTimeToDate(this.form.controls.appointmentAt.value, time);
+    this.initAppointmentPicker();
+    this.appointmentMenuTrigger?.openMenu();
+  }
+
+  initAppointmentPicker(): void {
+    const current =
+      this.form.controls.appointmentAt.value ?? parseDateTimeValue(this.context.timestamp) ?? new Date();
+    this.appointmentPickerDate.set(current);
+    this.appointmentPickerTime.set(toTimeInputValue(current));
+  }
+
+  onAppointmentPickerDateChange(date: Date | null): void {
+    this.appointmentPickerDate.set(date);
+    this.commitAppointmentPicker();
+  }
+
+  onAppointmentPickerTimeChange(time: string): void {
+    this.appointmentPickerTime.set(time);
+    this.commitAppointmentPicker();
+  }
+
+  private commitAppointmentPicker(): void {
+    const date = this.appointmentPickerDate();
+    if (!date) {
+      return;
+    }
+
+    const updated = applyTimeToDate(date, this.appointmentPickerTime());
+    if (!updated) {
+      return;
+    }
+
     this.form.controls.appointmentAt.setValue(updated);
     this.form.controls.appointmentAt.markAsDirty();
   }
 
   isInvalid(controlName: keyof PatientVisitFormGroup['controls']): boolean {
-    if (!this.isFormEditable()) {
+    if (!this.isCreateMode()) {
       return false;
     }
 
@@ -173,9 +208,7 @@ export class PatientVisitComponent implements OnInit {
   }
 
   submitForm(): void {
-    if (this.isViewMode() && !this.isEditing()) {
-      this.isEditing.set(true);
-      this.setFormReadOnly(false);
+    if (this.isDetailMode()) {
       return;
     }
 
@@ -190,16 +223,6 @@ export class PatientVisitComponent implements OnInit {
     }
 
     const value = getPatientVisitFormValue(this.form);
-
-    if (this.isViewMode()) {
-      const visit = this.store.saveVisit(value, this.visitId());
-      this.snackBar.open(`Event updated for ${visit.fullName}.`, 'Close', {
-        duration: SNACKBAR_DURATION_MS,
-      });
-      this.router.navigate(['/']);
-      return;
-    }
-
     const visit = this.store.createVisit(value);
     this.snackBar.open(`Event created for ${visit.fullName}.`, 'Close', {
       duration: SNACKBAR_DURATION_MS,

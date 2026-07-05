@@ -8,12 +8,13 @@
           {{ context.providerLine }}
         </p>
         <div class="inline-flex shrink-0 flex-wrap items-center gap-1.5 text-sm text-gray-500">
-          <span>{{ headerTimestamp() }}</span>
-          @if (isFormEditable()) {
+          <span>{{ appointmentDateTimeDisplay() }}</span>
+          @if (isCreateMode()) {
             <button
               type="button"
               class="inline-flex border-none bg-transparent p-0 text-gray-400"
               aria-label="Edit timestamp"
+              (click)="openAppointmentDateTimePicker()"
             >
               <mat-icon class="size-[18px] text-[18px]">edit</mat-icon>
             </button>
@@ -25,7 +26,7 @@
         <div class="flex flex-col gap-1.5">
           <label class="text-[13px] font-semibold text-gray-700" for="fullName">Patient full name</label>
           <mat-form-field appearance="outline" class="app-form-field" subscriptSizing="dynamic">
-            <input matInput id="fullName" formControlName="fullName" [readonly]="!isFormEditable()" />
+            <input matInput id="fullName" formControlName="fullName" [readonly]="!isCreateMode()" />
           </mat-form-field>
           @if (isInvalid('fullName')) {
             <span class="text-xs text-red-600" role="alert">Patient full name is required.</span>
@@ -45,9 +46,9 @@
                 [matDatepickerFilter]="birthDateFilter"
                 placeholder="dd/MM/yyyy"
                 autocomplete="bday"
-                [readonly]="!isFormEditable()"
+                [readonly]="!isCreateMode()"
               />
-              @if (isFormEditable()) {
+              @if (isCreateMode()) {
                 <mat-datepicker-toggle matIconSuffix [for]="birthDatePicker" />
               }
               <mat-datepicker #birthDatePicker startView="multi-year" />
@@ -56,7 +57,12 @@
           <div class="flex flex-col gap-1.5">
             <label class="text-[13px] font-semibold text-gray-700" for="patientId">Patient ID</label>
             <mat-form-field appearance="outline" class="app-form-field" subscriptSizing="dynamic">
-              <input matInput id="patientId" formControlName="patientId" [readonly]="!isFormEditable()" />
+              <input
+                matInput
+                id="patientId"
+                formControlName="patientId"
+                [readonly]="!isCreateMode()"
+              />
             </mat-form-field>
             @if (isInvalid('patientId')) {
               <span class="text-xs text-red-600" role="alert">Patient ID is required.</span>
@@ -73,9 +79,9 @@
               id="eventType"
               formControlName="eventType"
               placeholder="Event type..."
-              [readonly]="!isFormEditable()"
+              [readonly]="!isCreateMode()"
             />
-            @if (isFormEditable()) {
+            @if (isCreateMode()) {
               <button
                 matSuffix
                 type="button"
@@ -99,9 +105,9 @@
               id="visitReasons"
               formControlName="visitReasons"
               placeholder="Reasons for visit..."
-              [readonly]="!isFormEditable()"
+              [readonly]="!isCreateMode()"
             />
-            @if (isFormEditable()) {
+            @if (isCreateMode()) {
               <button
                 matSuffix
                 type="button"
@@ -114,14 +120,14 @@
           </mat-form-field>
         </div>
 
-        <fieldset class="m-0 border-none p-0" [disabled]="!isFormEditable()">
-          <legend class="mb-2 text-[13px] font-semibold text-gray-700">Status</legend>
+        <div class="m-0 border-none p-0">
+          <p class="mb-2 text-[13px] font-semibold text-gray-700">Status</p>
           <mat-radio-group formControlName="status" class="flex flex-col gap-3 min-[420px]:flex-row min-[420px]:flex-wrap min-[420px]:gap-5">
             <mat-radio-button [value]="VisitStatus.Draft">Draft</mat-radio-button>
             <mat-radio-button [value]="VisitStatus.Ready">Ready</mat-radio-button>
             <mat-radio-button [value]="VisitStatus.Approved">Approved</mat-radio-button>
           </mat-radio-group>
-        </fieldset>
+        </div>
 
         <app-label-value-row label="Doctor:">{{ context.doctorName }}</app-label-value-row>
 
@@ -129,32 +135,53 @@
           class="flex flex-col gap-2 border-b border-gray-100 py-3 md:flex-row md:items-center md:justify-between md:gap-4"
         >
           <span class="shrink-0 text-[13px] font-semibold text-gray-700">Appointment date and time:</span>
-          <div class="flex w-full min-w-0 flex-col gap-2 md:w-auto md:flex-row md:items-start">
-            <mat-form-field appearance="outline" class="app-form-field w-full min-w-0 md:min-w-[180px]" subscriptSizing="dynamic">
-              <input
-                matInput
-                formControlName="appointmentAt"
-                [matDatepicker]="appointmentDatePicker"
-                placeholder="dd/MM/yyyy"
-                autocomplete="off"
-                [readonly]="!isFormEditable()"
+          <mat-form-field
+            appearance="outline"
+            class="app-form-field w-full min-w-0 md:w-auto md:min-w-[240px]"
+            subscriptSizing="dynamic"
+          >
+            <input
+              matInput
+              id="appointmentAt"
+              [value]="appointmentDateTimeDisplay()"
+              placeholder="dd/MM/yyyy HH:mm"
+              autocomplete="off"
+              readonly
+              [disabled]="form.controls.appointmentAt.disabled"
+              aria-label="Appointment date and time"
+            />
+            @if (isCreateMode()) {
+              <button
+                #appointmentMenuTrigger="matMenuTrigger"
+                matSuffix
+                type="button"
+                class="inline-flex border-none bg-transparent p-0 text-gray-400"
+                aria-label="Edit appointment date and time"
+                [matMenuTriggerFor]="appointmentMenu"
+                (menuOpened)="initAppointmentPicker()"
+              >
+                <mat-icon class="size-[18px] text-[18px]">edit</mat-icon>
+              </button>
+            }
+          </mat-form-field>
+          <mat-menu #appointmentMenu="matMenu" panelClass="appointment-datetime-menu" xPosition="before">
+            <div class="appointment-datetime-panel" (click)="$event.stopPropagation()">
+              <mat-calendar
+                [selected]="appointmentPickerDate()"
+                (selectedChange)="onAppointmentPickerDateChange($event)"
               />
-              @if (isFormEditable()) {
-                <mat-datepicker-toggle matIconSuffix [for]="appointmentDatePicker" />
-              }
-              <mat-datepicker #appointmentDatePicker />
-            </mat-form-field>
-            <mat-form-field appearance="outline" class="app-form-field w-full min-w-0 md:w-32" subscriptSizing="dynamic">
-              <input
-                matInput
-                type="time"
-                [value]="appointmentTimeValue()"
-                [disabled]="!isFormEditable()"
-                (input)="onAppointmentTimeChange($any($event.target).value)"
-                aria-label="Appointment time"
-              />
-            </mat-form-field>
-          </div>
+              <div class="flex items-center gap-3 border-t border-gray-200 px-4 py-3">
+                <span class="text-sm font-medium text-gray-700">Time</span>
+                <input
+                  type="time"
+                  class="min-w-0 flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900"
+                  [value]="appointmentPickerTime()"
+                  (input)="onAppointmentPickerTimeChange($any($event.target).value)"
+                  aria-label="Appointment time"
+                />
+              </div>
+            </div>
+          </mat-menu>
         </div>
 
         <div class="flex flex-col gap-1.5">
@@ -165,9 +192,9 @@
               id="additionalNotes"
               formControlName="additionalNotes"
               rows="5"
-              [readonly]="!isFormEditable()"
+              [readonly]="!isCreateMode()"
             ></textarea>
-            @if (isFormEditable()) {
+            @if (isCreateMode()) {
               <button
                 matSuffix
                 type="button"
@@ -181,8 +208,12 @@
         </div>
 
         <footer class="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
-          <app-primary-button type="submit" class="order-1 sm:order-2">{{ primaryActionLabel() }}</app-primary-button>
-          <app-secondary-button class="order-2 sm:order-1" (pressed)="close()">{{ copy.close }}</app-secondary-button>
+          @if (isCreateMode()) {
+            <app-primary-button type="submit" class="order-1 sm:order-2">{{ copy.createEvent }}</app-primary-button>
+          }
+          <app-secondary-button class="order-2 sm:order-1" (pressed)="close()">
+            {{ copy.close }}
+          </app-secondary-button>
         </footer>
       </form>
     </app-ui-card>

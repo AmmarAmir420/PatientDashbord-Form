@@ -4,6 +4,7 @@ import { UI_COPY } from '../../../../core/constants';
 import { HealthcareStoreService } from '../../../../core/services/healthcare-store.service';
 import { SearchInputComponent, UiCardComponent } from '../../../../layouts/ui';
 import { RecentPatient } from '../../../../shared/interfaces';
+import { filterRecentPatients } from '../../../../shared/utils';
 
 @Component({
   selector: 'app-recent-patients',
@@ -17,20 +18,9 @@ export class RecentPatientsComponent {
   readonly copy = UI_COPY;
   readonly localSearchQuery = signal('');
 
-  readonly patients = computed(() => {
-    const query = this.localSearchQuery().trim().toLowerCase();
-    const patients = this.store.recentPatients();
-
-    if (!query) {
-      return patients;
-    }
-
-    return patients.filter(
-      (patient) =>
-        patient.name.toLowerCase().includes(query) ||
-        patient.personalId.toLowerCase().includes(query),
-    );
-  });
+  readonly patients = computed(() =>
+    filterRecentPatients(this.store.recentPatients(), this.localSearchQuery()),
+  );
 
   onSearch(value: string): void {
     this.localSearchQuery.set(value);

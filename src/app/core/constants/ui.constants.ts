@@ -12,7 +12,6 @@ export const UI_COPY = {
   recentPatients: 'Recent patients',
   noAppointments: 'No appointments match your search.',
   createEvent: 'Create event',
-  updateEvent: 'Update event',
   close: 'Close',
 } as const;
 

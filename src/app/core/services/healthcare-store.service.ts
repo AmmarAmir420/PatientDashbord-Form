@@ -16,7 +16,7 @@ import {
   WORKLIST_TOMORROW_MOCK,
   WORKLIST_YESTERDAY_MOCK,
 } from '../data/mocks';
-import { PATIENT_VISIT_CONTEXT_MOCK } from '../data/mocks/patient-visit.mock';
+import { PATIENT_VISIT_CONTEXT_MOCK, PATIENT_VISIT_DETAIL_DEFAULTS } from '../data/mocks/patient-visit.mock';
 import {
   PatientVisitFormModel,
   PatientVisitPrefill,
@@ -25,17 +25,28 @@ import {
   StickyNote,
   WorklistAppointment,
 } from '../../shared/interfaces';
+import {
+  formatWorklistTime,
+  formatPatientIdWithAge,
+  extractBasePatientId,
+  parseDateTimeValue,
+  parseDateValue,
+  resolveWorklistDay,
+  sortWorklistAppointments,
+  filterRecentPatients,
+  filterWorklistAppointments,
+} from '../../shared/utils';
 
 @Injectable({ providedIn: 'root' })
 export class HealthcareStoreService {
   private readonly router = inject(Router);
   private readonly snackBar = inject(MatSnackBar);
 
-  private readonly worklists: Record<WorklistDay, WorklistAppointment[]> = {
-    [WorklistDay.Yesterday]: WORKLIST_YESTERDAY_MOCK,
-    [WorklistDay.Today]: WORKLIST_TODAY_MOCK,
-    [WorklistDay.Tomorrow]: WORKLIST_TOMORROW_MOCK,
-  };
+  private readonly worklistState = signal<Record<WorklistDay, WorklistAppointment[]>>({
+    [WorklistDay.Yesterday]: [...WORKLIST_YESTERDAY_MOCK],
+    [WorklistDay.Today]: [...WORKLIST_TODAY_MOCK],
+    [WorklistDay.Tomorrow]: [...WORKLIST_TOMORROW_MOCK],
+  });
 
   readonly notes = signal<StickyNote[]>([...STICKY_NOTES_MOCK]);
   readonly patientMessageBadge = signal(3);
@@ -47,24 +58,19 @@ export class HealthcareStoreService {
   readonly createdVisits = signal<PatientVisitRecord[]>([]);
   private readonly recentPatientsState = signal<RecentPatient[]>([...RECENT_PATIENTS_MOCK]);
 
-  readonly worklistAppointments = computed(() =>
-    this.filterAppointments(this.worklists[this.worklistDay()]),
-  );
-
-  readonly recentPatients = computed(() => {
-    const query = this.globalSearch().trim().toLowerCase();
-    const patients = this.recentPatientsState();
-
-    if (!query) {
-      return patients;
-    }
-
-    return patients.filter(
-      (patient) =>
-        patient.name.toLowerCase().includes(query) ||
-        patient.personalId.toLowerCase().includes(query),
+  readonly worklistAppointments = computed(() => {
+    const appointments = sortWorklistAppointments(
+      this.worklistState()[this.worklistDay()].map((appointment) =>
+        this.enrichWorklistAppointment(appointment),
+      ),
     );
+
+    return filterWorklistAppointments(appointments, this.globalSearch());
   });
+
+  readonly recentPatients = computed(() =>
+    filterRecentPatients(this.recentPatientsState(), this.globalSearch()),
+  );
 
   setGlobalSearch(value: string): void {
     this.globalSearch.set(value);
@@ -101,19 +107,20 @@ export class HealthcareStoreService {
   }
 
   openPatientVisitForm(prefill: PatientVisitPrefill = {}): void {
-    this.router.navigate([APP_ROUTES.patientVisitNew], {
-      queryParams: {
-        fullName: prefill.fullName || null,
-        dateOfBirth: prefill.dateOfBirth || null,
-        patientId: prefill.patientId || null,
-        eventType: prefill.eventType || null,
-        visitReasons: prefill.visitReasons || null,
-      },
+    this.navigateToPatientVisit({
+      fullName: prefill.fullName,
+      dateOfBirth: prefill.dateOfBirth,
+      patientId: prefill.patientId,
+      eventType: prefill.eventType,
+      visitReasons: prefill.visitReasons,
     });
   }
 
   openPatient(appointment: WorklistAppointment): void {
-    this.openPatientVisitForm({
+    this.navigateToPatientVisit({
+      mode: 'detail',
+      source: 'worklist',
+      visitId: appointment.id,
       fullName: appointment.patientName,
       patientId: appointment.patientId,
       eventType: appointment.appointmentType,
@@ -121,35 +128,69 @@ export class HealthcareStoreService {
   }
 
   openRecentPatient(patient: RecentPatient): void {
-    this.router.navigate([APP_ROUTES.patientVisitNew], {
-      queryParams: {
-        mode: 'view',
-        visitId: patient.id,
-        fullName: patient.name,
-        patientId: patient.personalId,
-      },
+    this.navigateToPatientVisit({
+      mode: 'detail',
+      source: 'recent',
+      visitId: patient.id,
+      fullName: patient.name,
+      patientId: patient.personalId,
     });
   }
 
-  getPatientVisitViewModel(patientId: string, fullName: string): PatientVisitFormModel {
-    const existing = this.createdVisits().find((visit) => visit.patientId === patientId);
+  getPatientVisitDetailModel(
+    patientId: string,
+    fullName: string,
+    options: {
+      source: 'recent' | 'worklist';
+      visitId?: string | null;
+      eventType?: string | null;
+    },
+  ): PatientVisitFormModel {
+    const existing = this.findVisit(options.visitId, patientId, fullName);
     if (existing) {
-      return existing;
+      return {
+        ...existing,
+        patientId: extractBasePatientId(existing.patientId),
+      };
     }
+
+    const defaults = PATIENT_VISIT_DETAIL_DEFAULTS[options.source];
 
     return {
       fullName,
-      patientId,
-      dateOfBirth: '15/03/1985',
-      eventType: 'Follow-up visit',
-      visitReasons: 'Routine check-up',
-      status: VisitStatus.Ready,
-      additionalNotes: 'Existing patient record loaded for review.',
+      patientId: extractBasePatientId(patientId),
+      dateOfBirth: defaults.dateOfBirth,
+      eventType: options.eventType ?? defaults.eventType,
+      visitReasons: defaults.visitReasons,
+      status: defaults.status,
+      additionalNotes: defaults.additionalNotes,
       appointmentDateTime: PATIENT_VISIT_CONTEXT_MOCK.timestamp,
     };
   }
 
-  updateVisit(id: string, value: PatientVisitFormModel): PatientVisitRecord | undefined {
+  createVisit(value: PatientVisitFormModel): PatientVisitRecord {
+    return this.saveVisit(value);
+  }
+
+  saveVisit(value: PatientVisitFormModel, visitId?: string | null): PatientVisitRecord {
+    const existing = this.findVisit(visitId, value.patientId, value.fullName);
+
+    if (existing) {
+      return this.updateVisit(existing.id, value) ?? existing;
+    }
+
+    const visit: PatientVisitRecord = {
+      ...value,
+      id: visitId ?? crypto.randomUUID(),
+      createdAt: new Date().toISOString(),
+    };
+
+    this.createdVisits.update((current) => [visit, ...current]);
+    this.applyVisitSideEffects(visit, visitId);
+    return visit;
+  }
+
+  private updateVisit(id: string, value: PatientVisitFormModel): PatientVisitRecord | undefined {
     let updated: PatientVisitRecord | undefined;
 
     this.createdVisits.update((current) =>
@@ -164,28 +205,10 @@ export class HealthcareStoreService {
     );
 
     if (updated) {
-      this.prependRecentPatient({
-        id: updated.id,
-        name: updated.fullName,
-        personalId: updated.patientId,
-      });
+      this.applyVisitSideEffects(updated);
     }
 
     return updated;
-  }
-
-  saveVisit(value: PatientVisitFormModel, visitId?: string | null): PatientVisitRecord {
-    const existingById = visitId
-      ? this.createdVisits().find((visit) => visit.id === visitId)
-      : undefined;
-    const existingByPatient = this.createdVisits().find((visit) => visit.patientId === value.patientId);
-    const existing = existingById ?? existingByPatient;
-
-    if (existing) {
-      return this.updateVisit(existing.id, value) ?? existing;
-    }
-
-    return this.createVisit(value);
   }
 
   openClinicalAction(eventType: string): void {
@@ -281,20 +304,96 @@ export class HealthcareStoreService {
     this.notify('Notes downloaded.');
   }
 
-  createVisit(value: PatientVisitFormModel): PatientVisitRecord {
-    const visit: PatientVisitRecord = {
-      ...value,
-      id: crypto.randomUUID(),
-      createdAt: new Date().toISOString(),
-    };
+  private applyVisitSideEffects(visit: PatientVisitRecord, recentPatientId?: string | null): void {
+    const worklistDay = this.addVisitToWorklist(visit);
+    this.worklistDay.set(worklistDay);
 
-    this.createdVisits.update((current) => [visit, ...current]);
+    if (visit.status === VisitStatus.Approved) {
+      this.removeRecentPatient(visit, recentPatientId);
+      return;
+    }
+
     this.prependRecentPatient({
       id: visit.id,
       name: visit.fullName,
-      personalId: visit.patientId,
+      personalId: this.buildPersonalId(visit),
     });
-    return visit;
+  }
+
+  private removeRecentPatient(visit: PatientVisitRecord, recentPatientId?: string | null): void {
+    this.recentPatientsState.update((current) =>
+      current.filter((patient) => {
+        if (recentPatientId && patient.id === recentPatientId) {
+          return false;
+        }
+
+        return !(
+          patient.name === visit.fullName && this.matchesPatientId(patient.personalId, visit.patientId)
+        );
+      }),
+    );
+  }
+
+  private addVisitToWorklist(visit: PatientVisitRecord): WorklistDay {
+    const appointment = this.toWorklistAppointment(visit);
+    const worklistDay = this.toWorklistDay(parseDateTimeValue(visit.appointmentDateTime));
+
+    this.worklistState.update((state) => {
+      const next: Record<WorklistDay, WorklistAppointment[]> = {
+        [WorklistDay.Yesterday]: [...state[WorklistDay.Yesterday]],
+        [WorklistDay.Today]: [...state[WorklistDay.Today]],
+        [WorklistDay.Tomorrow]: [...state[WorklistDay.Tomorrow]],
+      };
+
+      for (const day of Object.values(WorklistDay)) {
+        next[day] = next[day].filter((item) => item.patientName !== visit.fullName);
+      }
+
+      next[worklistDay] = [...next[worklistDay], appointment];
+      return next;
+    });
+
+    return worklistDay;
+  }
+
+  private toWorklistAppointment(visit: PatientVisitRecord): WorklistAppointment {
+    const appointmentAt = parseDateTimeValue(visit.appointmentDateTime);
+
+    return {
+      id: visit.id,
+      time: formatWorklistTime(appointmentAt),
+      patientName: visit.fullName,
+      patientId: this.buildPersonalId(visit),
+      appointmentType: visit.eventType,
+      patientMessage: visit.additionalNotes || undefined,
+    };
+  }
+
+  private toWorklistDay(date: Date | null): WorklistDay {
+    switch (resolveWorklistDay(date)) {
+      case 'yesterday':
+        return WorklistDay.Yesterday;
+      case 'tomorrow':
+        return WorklistDay.Tomorrow;
+      default:
+        return WorklistDay.Today;
+    }
+  }
+
+  private buildPersonalId(visit: PatientVisitFormModel): string {
+    return formatPatientIdWithAge(
+      visit.patientId,
+      parseDateValue(visit.dateOfBirth),
+      parseDateTimeValue(visit.appointmentDateTime),
+    );
+  }
+
+  private matchesPatientId(storedId: string, lookupId: string): boolean {
+    if (storedId === lookupId) {
+      return true;
+    }
+
+    return extractBasePatientId(storedId) === extractBasePatientId(lookupId);
   }
 
   private prependRecentPatient(patient: RecentPatient): void {
@@ -304,22 +403,57 @@ export class HealthcareStoreService {
     ]);
   }
 
-  private filterAppointments(appointments: WorklistAppointment[]): WorklistAppointment[] {
-    const query = this.globalSearch().trim().toLowerCase();
-    if (!query) {
-      return appointments;
+  private enrichWorklistAppointment(appointment: WorklistAppointment): WorklistAppointment {
+    const visit = this.findVisit(
+      appointment.id,
+      appointment.patientId,
+      appointment.patientName,
+    );
+
+    if (!visit) {
+      return appointment;
     }
 
-    return appointments.filter(
-      (appointment) =>
-        appointment.patientName.toLowerCase().includes(query) ||
-        appointment.patientId.toLowerCase().includes(query) ||
-        appointment.appointmentType.toLowerCase().includes(query),
+    return {
+      ...appointment,
+      patientId: this.buildPersonalId(visit),
+    };
+  }
+
+  private findVisit(
+    visitId: string | null | undefined,
+    patientId: string,
+    fullName?: string,
+  ): PatientVisitRecord | undefined {
+    if (visitId) {
+      const byId = this.createdVisits().find((visit) => visit.id === visitId);
+      if (byId) {
+        return byId;
+      }
+    }
+
+    if (!fullName) {
+      return undefined;
+    }
+
+    return this.createdVisits().find(
+      (visit) =>
+        visit.fullName === fullName && this.matchesPatientId(visit.patientId, patientId),
     );
   }
 
+  private navigateToPatientVisit(
+    queryParams: Record<string, string | null | undefined>,
+  ): void {
+    this.router.navigate([APP_ROUTES.patientVisitNew], {
+      queryParams: Object.fromEntries(
+        Object.entries(queryParams).map(([key, value]) => [key, value ?? null]),
+      ),
+    });
+  }
+
   private resetExpandedForCurrentDay(): void {
-    const defaultExpanded = this.worklists[this.worklistDay()]
+    const defaultExpanded = this.worklistState()[this.worklistDay()]
       .filter((item) => item.expanded)
       .map((item) => item.id);
 
