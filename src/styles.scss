@@ -108,13 +108,6 @@ app-root {
   color: #374151;
 }
 
-.mat-badge-content {
-  background: var(--color-brand-primary);
-  color: #fff;
-  font-size: 11px;
-  font-weight: 600;
-}
-
 @media (max-width: 639px) {
   .mat-datepicker-content,
   .mat-mdc-menu-panel {
