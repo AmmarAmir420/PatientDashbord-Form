@@ -1,18 +1,26 @@
 import { Routes } from '@angular/router';
 
+import { APP_ROUTES } from './core/constants';
+
 export const routes: Routes = [
   {
-    path: '',
+    path: APP_ROUTES.dashboard,
     loadComponent: () =>
       import('./features/dashboard/dashboard.component').then((m) => m.DashboardComponent),
   },
   {
-    path: 'event/new',
+    path: APP_ROUTES.patientVisitNew,
     loadComponent: () =>
-      import('./features/event-form/event-form.component').then((m) => m.EventFormComponent),
+      import('./features/patient-visit/patient-visit.component').then(
+        (m) => m.PatientVisitComponent,
+      ),
+  },
+  {
+    path: APP_ROUTES.legacyEventNew,
+    redirectTo: APP_ROUTES.patientVisitNew,
   },
   {
     path: '**',
-    redirectTo: '',
+    redirectTo: APP_ROUTES.dashboard,
   },
 ];

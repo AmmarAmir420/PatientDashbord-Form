@@ -1,19 +1,15 @@
-<div class="dashboard-page">
-  <app-header />
+<app-main-layout>
+  <app-quick-shortcuts class="mb-5 block" />
 
-  <main class="dashboard-page__main">
-    <app-quick-shortcuts class="dashboard-page__shortcuts" />
-
-    <div class="dashboard-page__grid">
-      <div class="dashboard-page__left">
-        <app-worklist />
-        <app-notes-panel />
-      </div>
-
-      <aside class="dashboard-page__right">
-        <app-action-grid />
-        <app-recent-patients />
-      </aside>
+  <div class="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
+    <div class="flex flex-col gap-5">
+      <app-worklist />
+      <app-notes-panel />
     </div>
-  </main>
-</div>
+
+    <aside class="flex flex-col gap-5">
+      <app-action-grid />
+      <app-recent-patients />
+    </aside>
+  </div>
+</app-main-layout>

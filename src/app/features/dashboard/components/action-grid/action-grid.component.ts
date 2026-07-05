@@ -1,26 +1,26 @@
-import { Component, inject } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 
 import { HealthcareStoreService } from '../../../../core/services/healthcare-store.service';
-import { CLINICAL_ACTIONS } from '../../../../shared/data/dashboard.data';
+import { CLINICAL_ACTIONS_MOCK } from '../../../../shared/data/mocks/dashboard.mock';
+import { IconTileButtonComponent, UiCardComponent } from '../../../../layouts/ui';
 import { ClinicalAction } from '../../../../shared/models';
 
 @Component({
   selector: 'app-action-grid',
-  imports: [MatIconModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [IconTileButtonComponent, UiCardComponent],
   templateUrl: './action-grid.component.html',
-  styleUrl: './action-grid.component.scss',
 })
 export class ActionGridComponent {
   private readonly store = inject(HealthcareStoreService);
 
-  readonly actions = CLINICAL_ACTIONS;
+  readonly actions = CLINICAL_ACTIONS_MOCK;
 
   openAction(action: ClinicalAction): void {
     this.store.openClinicalAction(action.eventType);
   }
 
   createCustomAction(): void {
-    this.store.openEventForm();
+    this.store.openPatientVisitForm();
   }
 }

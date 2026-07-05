@@ -1,15 +1,15 @@
-import { Component, inject, input, output } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
+import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 
 import { HealthcareStoreService } from '../../../../core/services/healthcare-store.service';
+import { ActionButtonComponent } from '../../../../layouts/ui';
 import { WorklistAppointment } from '../../../../shared/models';
 
 @Component({
   selector: 'app-worklist-item',
-  imports: [MatButtonModule, MatIconModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [ActionButtonComponent, MatIconModule],
   templateUrl: './worklist-item.component.html',
-  styleUrl: './worklist-item.component.scss',
 })
 export class WorklistItemComponent {
   private readonly store = inject(HealthcareStoreService);

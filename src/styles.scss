@@ -1,6 +1,14 @@
 @use 'tailwindcss';
-
 @use '@angular/material' as mat;
+
+@theme {
+  --color-brand-navy: #0b3d6b;
+  --color-brand-primary: #1d6fd8;
+  --color-brand-sky: #60a5fa;
+  --color-page: #f3f4f6;
+  --color-shortcuts-bar: #eceff3;
+  --font-sans: Roboto, 'Helvetica Neue', sans-serif;
+}
 
 html {
   @include mat.theme(
@@ -23,9 +31,10 @@ body {
 
 body {
   margin: 0;
-  font-family: Roboto, 'Helvetica Neue', sans-serif;
-  background-color: #f3f4f6;
+  font-family: var(--font-sans);
+  background-color: var(--color-page);
   color: #111827;
+  -webkit-font-smoothing: antialiased;
 }
 
 .mat-icon {
@@ -43,4 +52,41 @@ body {
   font-feature-settings: 'liga';
   -webkit-font-smoothing: antialiased;
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.app-material-field .mat-mdc-text-field-wrapper {
+  background-color: #f9fafb;
+  border-radius: 0.5rem;
+}
+
+.app-material-field .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+
+.app-material-field .mdc-notched-outline__leading,
+.app-material-field .mdc-notched-outline__notch,
+.app-material-field .mdc-notched-outline__trailing {
+  border-color: #d1d5db;
+}
+
+.app-material-field.mat-focused .mdc-notched-outline__leading,
+.app-material-field.mat-focused .mdc-notched-outline__notch,
+.app-material-field.mat-focused .mdc-notched-outline__trailing {
+  border-color: var(--color-brand-primary);
+}
+
+.app-search-field .mat-mdc-text-field-wrapper {
+  border-radius: 9999px;
+}
+
+.mat-mdc-radio-button .mdc-label {
+  font-size: 0.875rem;
+  color: #374151;
+}
+
+.mat-badge-content {
+  background: var(--color-brand-primary);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
 }

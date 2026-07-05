@@ -1,16 +1,13 @@
-<nav class="shortcuts" aria-label="Quick actions">
+<nav
+  class="flex flex-wrap justify-between gap-3 rounded-[20px] bg-shortcuts-bar px-6 py-5"
+  aria-label="Quick actions"
+>
   @for (shortcut of shortcuts(); track shortcut.label) {
-    <button type="button" class="shortcuts__item" (click)="onShortcutClick(shortcut)">
-      <span
-        class="shortcuts__icon-wrap"
-        [matBadge]="shortcut.badge"
-        [matBadgeHidden]="!shortcut.badge"
-        matBadgeColor="primary"
-        matBadgeSize="small"
-      >
-        <mat-icon>{{ shortcut.icon }}</mat-icon>
-      </span>
-      <span class="shortcuts__label">{{ shortcut.label }}</span>
-    </button>
+    <app-icon-tile-button
+      [icon]="shortcut.icon"
+      [label]="shortcut.label"
+      [badge]="shortcut.badge"
+      (pressed)="onShortcutClick(shortcut)"
+    />
   }
 </nav>

@@ -1,34 +1,40 @@
-<section class="worklist-card">
-  <header class="worklist-card__header">
-    <h2 class="worklist-card__title">{{ worklistDayLabel[store.worklistDay()] }}</h2>
-    <button type="button" class="worklist-card__calendar-btn" (click)="openCalendar()">
-      <mat-icon>calendar_month</mat-icon>
-      Calendar
-    </button>
-  </header>
+<app-ui-card padding="none" [overflowHidden]="true">
+  <div class="px-5 pb-3 pt-5">
+    <app-section-header [title]="worklistDayLabel[store.worklistDay()]">
+      <button
+        actions
+        type="button"
+        class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border-none bg-blue-50 px-3.5 py-2 text-[13px] font-medium text-brand-primary"
+        (click)="openCalendar()"
+      >
+        <mat-icon class="!size-[18px] !text-[18px]">calendar_month</mat-icon>
+        {{ copy.calendar }}
+      </button>
+    </app-section-header>
+  </div>
 
-  <nav class="worklist-card__nav">
+  <nav class="flex justify-between border-b border-gray-200 px-5 pb-3">
     <button
       type="button"
-      class="worklist-card__nav-link"
-      [disabled]="store.worklistDay() === 'yesterday'"
+      class="cursor-pointer border-none bg-transparent p-0 text-[13px] text-gray-500 hover:text-brand-primary disabled:cursor-default disabled:opacity-40"
+      [disabled]="store.worklistDay() === WorklistDay.Yesterday"
       (click)="showPreviousList()"
     >
-      &lt; Yesterday's list
+      &lt; {{ copy.yesterdayList }}
     </button>
     <button
       type="button"
-      class="worklist-card__nav-link"
-      [disabled]="store.worklistDay() === 'tomorrow'"
+      class="cursor-pointer border-none bg-transparent p-0 text-[13px] text-gray-500 hover:text-brand-primary disabled:cursor-default disabled:opacity-40"
+      [disabled]="store.worklistDay() === WorklistDay.Tomorrow"
       (click)="showNextList()"
     >
-      Tomorrow's list &gt;
+      {{ copy.tomorrowList }} &gt;
     </button>
   </nav>
 
-  <div class="worklist-card__list">
+  <div>
     @if (store.worklistAppointments().length === 0) {
-      <p class="worklist-card__empty">No appointments match your search.</p>
+      <p class="m-0 px-5 py-6 text-center text-sm text-gray-500">{{ copy.noAppointments }}</p>
     } @else {
       @for (appointment of store.worklistAppointments(); track appointment.id) {
         <app-worklist-item
@@ -39,4 +45,4 @@
       }
     }
   </div>
-</section>
+</app-ui-card>

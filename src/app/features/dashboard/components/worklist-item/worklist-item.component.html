@@ -1,35 +1,39 @@
-<div class="worklist-item" [class.worklist-item--expanded]="expanded()">
-  <div class="worklist-item__row">
+<div class="border-b border-gray-200 last:border-b-0">
+  <div class="flex min-h-14 flex-wrap items-center gap-3 px-4 py-3.5">
     <button
       type="button"
-      class="worklist-item__toggle"
+      class="inline-flex size-7 shrink-0 cursor-pointer items-center justify-center border-none bg-transparent text-gray-500"
       (click)="toggleExpanded()"
       [attr.aria-expanded]="expanded()"
       [attr.aria-label]="expanded() ? 'Close message' : 'Open message'"
     >
-      <mat-icon>{{ expanded() ? 'remove' : 'add' }}</mat-icon>
+      <mat-icon class="!size-5 !text-[20px]">{{ expanded() ? 'remove' : 'add' }}</mat-icon>
     </button>
 
-    <div class="worklist-item__meta">
-      <span class="worklist-item__time">{{ appointment().time }}</span>
-      <span class="worklist-item__separator">-</span>
-      <span class="worklist-item__patient">{{ appointment().patientName }}</span>
-      <span class="worklist-item__separator">-</span>
-      <span class="worklist-item__id">{{ appointment().patientId }}</span>
-      <span class="worklist-item__separator">|</span>
-      <span class="worklist-item__type">{{ appointment().appointmentType }}</span>
+    <div class="min-w-0 flex-1 truncate text-sm text-gray-900">
+      <span class="font-medium">{{ appointment().time }}</span>
+      <span class="mx-1.5 text-gray-400">-</span>
+      <span>{{ appointment().patientName }}</span>
+      <span class="mx-1.5 text-gray-400">-</span>
+      <span class="text-gray-600">{{ appointment().patientId }}</span>
+      <span class="mx-1.5 text-gray-400">|</span>
+      <span class="text-gray-600">{{ appointment().appointmentType }}</span>
     </div>
 
-    <div class="worklist-item__actions">
-      <button type="button" class="btn btn--dark" (click)="openTelehealthVisit()">Open telehealth visit</button>
-      <button type="button" class="btn btn--primary" (click)="openPatient()">Open patient</button>
-      <button type="button" class="btn btn--light" (click)="openMessages()">Messages</button>
+    <div class="flex shrink-0 flex-wrap gap-2 pl-10 md:pl-0">
+      <app-action-button
+        label="Open telehealth visit"
+        variant="navy"
+        (pressed)="openTelehealthVisit()"
+      />
+      <app-action-button label="Open patient" variant="primary" (pressed)="openPatient()" />
+      <app-action-button label="Messages" variant="light" (pressed)="openMessages()" />
     </div>
   </div>
 
   @if (expanded() && appointment().patientMessage) {
-    <div class="worklist-item__message">
-      <p>{{ appointment().patientMessage }}</p>
+    <div class="mb-4 ml-14 mr-4 rounded-[10px] border-l-[3px] border-blue-300 bg-gray-100 px-4 py-3.5">
+      <p class="m-0 text-sm leading-relaxed text-gray-700">{{ appointment().patientMessage }}</p>
     </div>
   }
 </div>

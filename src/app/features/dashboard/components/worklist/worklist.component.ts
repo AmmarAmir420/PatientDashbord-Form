@@ -1,24 +1,27 @@
-import { Component, inject } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 
+import { UI_COPY } from '../../../../core/constants';
 import { HealthcareStoreService } from '../../../../core/services/healthcare-store.service';
+import { ShortcutAction, WorklistDay } from '../../../../shared/enums';
+import { SectionHeaderComponent, UiCardComponent } from '../../../../layouts/ui';
 import { WorklistItemComponent } from '../worklist-item/worklist-item.component';
 
 @Component({
   selector: 'app-worklist',
-  imports: [MatButtonModule, MatIconModule, WorklistItemComponent],
-  templateUrl: './worklist.component.html',
-  styleUrl: './worklist.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [MatIconModule, SectionHeaderComponent, UiCardComponent, WorklistItemComponent],  templateUrl: './worklist.component.html',
 })
 export class WorklistComponent {
   readonly store = inject(HealthcareStoreService);
+  readonly copy = UI_COPY;
+  readonly WorklistDay = WorklistDay;
 
-  readonly worklistDayLabel = {
-    yesterday: "Yesterday's list",
-    today: 'Worklist',
-    tomorrow: "Tomorrow's list",
-  } as const;
+  readonly worklistDayLabel: Record<WorklistDay, string> = {
+    [WorklistDay.Yesterday]: "Yesterday's list",
+    [WorklistDay.Today]: UI_COPY.worklist,
+    [WorklistDay.Tomorrow]: "Tomorrow's list",
+  };
 
   showPreviousList(): void {
     this.store.showPreviousWorklist();
@@ -29,6 +32,6 @@ export class WorklistComponent {
   }
 
   openCalendar(): void {
-    this.store.handleShortcut('calendar');
+    this.store.handleShortcut(ShortcutAction.Calendar);
   }
 }

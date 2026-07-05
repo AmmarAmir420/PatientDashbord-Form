@@ -1,25 +1,41 @@
-<section class="notes-card">
-  <header class="notes-card__header">
-    <h2 class="notes-card__title">Notes</h2>
-    <div class="notes-card__tools">
-      <button type="button" aria-label="Download notes" (click)="store.downloadNotes()">
+<app-ui-card>
+  <app-section-header [title]="copy.notes">
+    <div actions class="flex gap-1">
+      <button
+        type="button"
+        class="inline-flex size-9 cursor-pointer items-center justify-center rounded-lg border-none bg-transparent text-gray-500 hover:bg-gray-100"
+        aria-label="Download notes"
+        (click)="store.downloadNotes()"
+      >
         <mat-icon>download</mat-icon>
       </button>
-      <button type="button" aria-label="Delete notes" (click)="store.deleteNotes()">
+      <button
+        type="button"
+        class="inline-flex size-9 cursor-pointer items-center justify-center rounded-lg border-none bg-transparent text-gray-500 hover:bg-gray-100"
+        aria-label="Delete notes"
+        (click)="store.deleteNotes()"
+      >
         <mat-icon>delete_outline</mat-icon>
       </button>
     </div>
-  </header>
+  </app-section-header>
 
-  <div class="notes-card__grid">
-    <button type="button" class="notes-card__add" aria-label="Add note" (click)="store.addNote()">
-      <mat-icon>add</mat-icon>
+  <div class="mt-4 flex flex-wrap gap-3">
+    <button
+      type="button"
+      class="flex size-[100px] w-[120px] cursor-pointer items-center justify-center rounded-xl border border-dashed border-gray-300 bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+      aria-label="Add note"
+      (click)="store.addNote()"
+    >
+      <mat-icon class="!text-[32px]">add</mat-icon>
     </button>
 
     @for (note of store.notes(); track note.id) {
-      <article class="notes-card__note">
-        <p>{{ note.preview }}</p>
+      <article
+        class="flex size-[100px] w-[120px] flex-col rounded-xl border border-amber-200 bg-amber-50 p-3"
+      >
+        <p class="m-0 text-xs leading-snug text-amber-900">{{ note.preview }}</p>
       </article>
     }
   </div>
-</section>
+</app-ui-card>

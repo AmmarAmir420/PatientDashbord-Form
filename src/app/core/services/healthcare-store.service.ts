@@ -2,22 +2,26 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 
+import { APP_ROUTES, SNACKBAR_DURATION_MS } from '../constants';
 import {
-  RECENT_PATIENTS,
-  STICKY_NOTES,
-  WORKLIST_APPOINTMENTS,
-  WORKLIST_TOMORROW,
-  WORKLIST_YESTERDAY,
-} from '../../shared/data/dashboard.data';
-import {
-  EventFormPrefill,
-  EventFormValue,
-  PatientEvent,
-  RecentPatient,
+  ProfileMenuAction,
   ShortcutAction,
+  WorklistDay,
+} from '../../shared/enums';
+import {
+  RECENT_PATIENTS_MOCK,
+  STICKY_NOTES_MOCK,
+  WORKLIST_TODAY_MOCK,
+  WORKLIST_TOMORROW_MOCK,
+  WORKLIST_YESTERDAY_MOCK,
+} from '../../shared/data/mocks/dashboard.mock';
+import {
+  PatientVisitFormModel,
+  PatientVisitPrefill,
+  PatientVisitRecord,
+  RecentPatient,
   StickyNote,
   WorklistAppointment,
-  WorklistDay,
 } from '../../shared/models';
 
 @Injectable({ providedIn: 'root' })
@@ -26,19 +30,19 @@ export class HealthcareStoreService {
   private readonly snackBar = inject(MatSnackBar);
 
   private readonly worklists: Record<WorklistDay, WorklistAppointment[]> = {
-    yesterday: WORKLIST_YESTERDAY,
-    today: WORKLIST_APPOINTMENTS,
-    tomorrow: WORKLIST_TOMORROW,
+    [WorklistDay.Yesterday]: WORKLIST_YESTERDAY_MOCK,
+    [WorklistDay.Today]: WORKLIST_TODAY_MOCK,
+    [WorklistDay.Tomorrow]: WORKLIST_TOMORROW_MOCK,
   };
 
-  readonly notes = signal<StickyNote[]>([...STICKY_NOTES]);
+  readonly notes = signal<StickyNote[]>([...STICKY_NOTES_MOCK]);
   readonly patientMessageBadge = signal(3);
   readonly globalSearch = signal('');
-  readonly worklistDay = signal<WorklistDay>('today');
+  readonly worklistDay = signal<WorklistDay>(WorklistDay.Today);
   readonly expandedIds = signal<Set<string>>(
-    new Set(WORKLIST_APPOINTMENTS.filter((item) => item.expanded).map((item) => item.id)),
+    new Set(WORKLIST_TODAY_MOCK.filter((item) => item.expanded).map((item) => item.id)),
   );
-  readonly createdEvents = signal<PatientEvent[]>([]);
+  readonly createdVisits = signal<PatientVisitRecord[]>([]);
 
   readonly worklistAppointments = computed(() =>
     this.filterAppointments(this.worklists[this.worklistDay()]),
@@ -47,10 +51,10 @@ export class HealthcareStoreService {
   readonly recentPatients = computed(() => {
     const query = this.globalSearch().trim().toLowerCase();
     if (!query) {
-      return RECENT_PATIENTS;
+      return RECENT_PATIENTS_MOCK;
     }
 
-    return RECENT_PATIENTS.filter(
+    return RECENT_PATIENTS_MOCK.filter(
       (patient) =>
         patient.name.toLowerCase().includes(query) ||
         patient.personalId.toLowerCase().includes(query),
@@ -63,14 +67,14 @@ export class HealthcareStoreService {
 
   showPreviousWorklist(): void {
     this.worklistDay.set(
-      this.worklistDay() === 'tomorrow' ? 'today' : 'yesterday',
+      this.worklistDay() === WorklistDay.Tomorrow ? WorklistDay.Today : WorklistDay.Yesterday,
     );
     this.resetExpandedForCurrentDay();
   }
 
   showNextWorklist(): void {
     this.worklistDay.set(
-      this.worklistDay() === 'yesterday' ? 'today' : 'tomorrow',
+      this.worklistDay() === WorklistDay.Yesterday ? WorklistDay.Today : WorklistDay.Tomorrow,
     );
     this.resetExpandedForCurrentDay();
   }
@@ -91,8 +95,8 @@ export class HealthcareStoreService {
     });
   }
 
-  openEventForm(prefill: EventFormPrefill = {}): void {
-    this.router.navigate(['/event/new'], {
+  openPatientVisitForm(prefill: PatientVisitPrefill = {}): void {
+    this.router.navigate([APP_ROUTES.patientVisitNew], {
       queryParams: {
         fullName: prefill.fullName || null,
         dateOfBirth: prefill.dateOfBirth || null,
@@ -104,7 +108,7 @@ export class HealthcareStoreService {
   }
 
   openPatient(appointment: WorklistAppointment): void {
-    this.openEventForm({
+    this.openPatientVisitForm({
       fullName: appointment.patientName,
       patientId: appointment.patientId,
       eventType: appointment.appointmentType,
@@ -112,14 +116,14 @@ export class HealthcareStoreService {
   }
 
   openRecentPatient(patient: RecentPatient): void {
-    this.openEventForm({
+    this.openPatientVisitForm({
       fullName: patient.name,
       patientId: patient.personalId,
     });
   }
 
   openClinicalAction(eventType: string): void {
-    this.openEventForm({ eventType });
+    this.openPatientVisitForm({ eventType });
   }
 
   openTelehealthVisit(appointment: WorklistAppointment): void {
@@ -137,42 +141,42 @@ export class HealthcareStoreService {
 
   handleShortcut(action: ShortcutAction): void {
     switch (action) {
-      case 'patient-review':
+      case ShortcutAction.PatientReview:
         this.globalSearch.set('');
-        this.worklistDay.set('today');
-        this.notify('Showing today\'s patient review worklist.');
+        this.worklistDay.set(WorklistDay.Today);
+        this.notify("Showing today's patient review worklist.");
         break;
-      case 'patient-messages':
+      case ShortcutAction.PatientMessages:
         this.patientMessageBadge.set(0);
         this.notify('3 unread patient messages: James Lake, Michael Cohen, Karl Newman.');
         break;
-      case 'doctor-messages':
+      case ShortcutAction.DoctorMessages:
         this.notify('2 doctor messages waiting in the inbox.');
         break;
-      case 'working-hours':
-        this.notify('Today\'s schedule: 08:00–16:00. Next break at 12:00.');
+      case ShortcutAction.WorkingHours:
+        this.notify("Today's schedule: 08:00–16:00. Next break at 12:00.");
         break;
-      case 'calendar':
+      case ShortcutAction.Calendar:
         this.notify('Calendar opened for the current week.');
         break;
-      case 'settings':
+      case ShortcutAction.Settings:
         this.notify('Settings panel is not available in this demo.');
         break;
-      case 'health-portal':
+      case ShortcutAction.HealthPortal:
         this.notify('Health portal opened in a new tab.');
         break;
     }
   }
 
-  handleProfileAction(action: 'settings' | 'admin' | 'logout' | undefined): void {
+  handleProfileAction(action: ProfileMenuAction | undefined): void {
     switch (action) {
-      case 'settings':
+      case ProfileMenuAction.Settings:
         this.notify('Settings saved locally for this session.');
         break;
-      case 'admin':
+      case ProfileMenuAction.Admin:
         this.notify('Admin panel access is disabled in this demo.');
         break;
-      case 'logout':
+      case ProfileMenuAction.Logout:
         this.globalSearch.set('');
         this.router.navigate(['/']);
         this.notify('You have been logged out.');
@@ -211,15 +215,15 @@ export class HealthcareStoreService {
     this.notify('Notes downloaded.');
   }
 
-  createEvent(value: EventFormValue): PatientEvent {
-    const event: PatientEvent = {
+  createVisit(value: PatientVisitFormModel): PatientVisitRecord {
+    const visit: PatientVisitRecord = {
       ...value,
       id: crypto.randomUUID(),
       createdAt: new Date().toISOString(),
     };
 
-    this.createdEvents.update((current) => [event, ...current]);
-    return event;
+    this.createdVisits.update((current) => [visit, ...current]);
+    return visit;
   }
 
   private filterAppointments(appointments: WorklistAppointment[]): WorklistAppointment[] {
@@ -245,6 +249,6 @@ export class HealthcareStoreService {
   }
 
   private notify(message: string): void {
-    this.snackBar.open(message, 'Close', { duration: 3500 });
+    this.snackBar.open(message, 'Close', { duration: SNACKBAR_DURATION_MS });
   }
 }

@@ -1,0 +1,87 @@
+<app-main-layout>
+  <div class="mx-auto max-w-[900px] py-4 md:py-8">
+    <app-ui-card padding="lg" class="shadow-md">
+      <header
+        class="mb-6 flex flex-col gap-3 border-b border-gray-200 pb-6 sm:flex-row sm:items-start sm:justify-between"
+      >
+        <p class="m-0 text-sm font-medium leading-snug text-gray-900">{{ context.providerLine }}</p>
+        <div class="inline-flex shrink-0 items-center gap-1.5 text-sm text-gray-500">
+          <span>{{ context.timestamp }}</span>
+          <button type="button" class="border-none bg-transparent p-0 text-gray-400" aria-label="Edit timestamp">
+            <mat-icon class="size-[18px] text-[18px]">edit</mat-icon>
+          </button>
+        </div>
+      </header>
+
+      <form class="flex flex-col gap-5" [formGroup]="form" (ngSubmit)="createVisit()">
+        <app-form-field
+          label="Patient full name"
+          inputId="fullName"
+          [errorMessage]="isInvalid('fullName') ? 'Patient full name is required.' : ''"
+        >
+          <input matInput id="fullName" formControlName="fullName" />
+        </app-form-field>
+
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <app-form-field label="Date of birth" inputId="dateOfBirth">
+            <input matInput id="dateOfBirth" formControlName="dateOfBirth" />
+          </app-form-field>
+
+          <app-form-field
+            label="Patient ID"
+            inputId="patientId"
+            [errorMessage]="isInvalid('patientId') ? 'Patient ID is required.' : ''"
+          >
+            <input matInput id="patientId" formControlName="patientId" />
+          </app-form-field>
+        </div>
+
+        <app-form-field
+          label="Event type"
+          inputId="eventType"
+          [errorMessage]="isInvalid('eventType') ? 'Event type is required.' : ''"
+        >
+          <mat-icon matPrefix class="text-gray-400">search</mat-icon>
+          <input matInput id="eventType" formControlName="eventType" placeholder="Event type..." />
+          <app-icon-button matSuffix size="sm" ariaLabel="Voice input">
+            <mat-icon class="size-5 text-[20px]">mic</mat-icon>
+          </app-icon-button>
+        </app-form-field>
+
+        <app-form-field label="Reasons for visit" inputId="visitReasons">
+          <input matInput id="visitReasons" formControlName="visitReasons" placeholder="Reasons for visit..." />
+          <app-icon-button matSuffix size="sm" ariaLabel="Voice input">
+            <mat-icon class="size-5 text-[20px]">mic</mat-icon>
+          </app-icon-button>
+        </app-form-field>
+
+        <fieldset class="m-0 border-none p-0">
+          <legend class="mb-2 text-[13px] font-semibold text-gray-700">Status</legend>
+          <mat-radio-group formControlName="status" class="flex flex-wrap gap-5">
+            <mat-radio-button [value]="VisitStatus.Draft">Draft</mat-radio-button>
+            <mat-radio-button [value]="VisitStatus.Ready">Ready</mat-radio-button>
+            <mat-radio-button [value]="VisitStatus.Approved">Approved</mat-radio-button>
+          </mat-radio-group>
+        </fieldset>
+
+        <app-label-value-row label="Doctor:">{{ context.doctorName }}</app-label-value-row>
+
+        <app-label-value-row label="Appointment date and time:" [editable]="true" editAriaLabel="Edit appointment time">
+          {{ context.timestamp }}
+        </app-label-value-row>
+
+        <app-form-field label="Additional notes" inputId="additionalNotes">
+          <textarea matInput id="additionalNotes" formControlName="additionalNotes" rows="5"></textarea>
+          <app-icon-button matSuffix size="sm" ariaLabel="Voice input">
+            <mat-icon class="size-5 text-[20px]">mic</mat-icon>
+          </app-icon-button>
+        </app-form-field>
+
+        <footer class="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
+          <app-secondary-button (pressed)="close()">{{ copy.close }}</app-secondary-button>
+          <app-primary-button type="submit">{{ copy.createEvent }}</app-primary-button>
+        </footer>
+      </form>
+    </app-ui-card>
+  </div>
+</app-main-layout>

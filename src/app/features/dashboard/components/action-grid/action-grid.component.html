@@ -1,22 +1,12 @@
-<section class="action-grid-card">
-  <div class="action-grid-card__grid">
+<app-ui-card>
+  <div class="grid grid-cols-3 gap-x-3 gap-y-4">
     @for (action of actions; track action.label) {
-      <button type="button" class="action-grid-card__item" (click)="openAction(action)">
-        <span class="action-grid-card__icon">
-          <mat-icon>{{ action.icon }}</mat-icon>
-        </span>
-        <span class="action-grid-card__label">{{ action.label }}</span>
-      </button>
+      <app-icon-tile-button
+        [icon]="action.icon"
+        [label]="action.label"
+        (pressed)="openAction(action)"
+      />
     }
-    <button
-      type="button"
-      class="action-grid-card__item action-grid-card__item--add"
-      aria-label="Add action"
-      (click)="createCustomAction()"
-    >
-      <span class="action-grid-card__icon action-grid-card__icon--add">
-        <mat-icon>add</mat-icon>
-      </span>
-    </button>
+    <app-icon-tile-button icon="add" [large]="true" (pressed)="createCustomAction()" />
   </div>
-</section>
+</app-ui-card>
