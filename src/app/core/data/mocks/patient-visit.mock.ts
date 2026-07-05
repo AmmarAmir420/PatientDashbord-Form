@@ -1,4 +1,4 @@
-import { PatientVisitContext } from '../../models';
+import { PatientVisitContext } from '../../../shared/interfaces';
 
 export const PATIENT_VISIT_CONTEXT_MOCK: PatientVisitContext = {
   providerLine: 'Tuomas Veikko Kerola, Helsinki Hospital, Cardiology Department',

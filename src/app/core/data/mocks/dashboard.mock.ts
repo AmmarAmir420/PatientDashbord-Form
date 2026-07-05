@@ -1,5 +1,5 @@
-import { ProfileMenuAction } from '../../enums/profile-menu-action.enum';
-import { ShortcutAction } from '../../enums/shortcut-action.enum';
+import { ProfileMenuAction } from '../../../shared/enums/profile-menu-action.enum';
+import { ShortcutAction } from '../../../shared/enums/shortcut-action.enum';
 import {
   ClinicalAction,
   ProfileMenuItem,
@@ -8,7 +8,7 @@ import {
   StickyNote,
   UserProfile,
   WorklistAppointment,
-} from '../../models';
+} from '../../../shared/interfaces';
 
 export const CURRENT_USER_MOCK: UserProfile = {
   fullName: 'Tuomas Veikko Kerola',
@@ -55,6 +55,7 @@ export const WORKLIST_TODAY_MOCK: WorklistAppointment[] = [
     patientName: 'Michael Cohen',
     patientId: '240545-123Y',
     appointmentType: 'Telehealth visit',
+    patientMessage: 'I would like to review my recent lab results during this visit.',
   },
   {
     id: '3',
@@ -62,6 +63,7 @@ export const WORKLIST_TODAY_MOCK: WorklistAppointment[] = [
     patientName: 'Karl Newman',
     patientId: '240545-123Y',
     appointmentType: 'Telehealth visit',
+    patientMessage: 'Please confirm whether I should continue my current medication dosage.',
   },
   {
     id: '4',
@@ -69,6 +71,7 @@ export const WORKLIST_TODAY_MOCK: WorklistAppointment[] = [
     patientName: 'George Virtan',
     patientId: '240545-123Y',
     appointmentType: 'Telehealth visit',
+    patientMessage: 'I have been experiencing mild dizziness in the mornings.',
   },
 ];
 
@@ -87,6 +90,7 @@ export const WORKLIST_YESTERDAY_MOCK: WorklistAppointment[] = [
     patientName: 'Eva Cohen',
     patientId: '240545-123Y',
     appointmentType: 'Telehealth visit',
+    patientMessage: 'Can we discuss adjusting my evening medication schedule?',
   },
 ];
 
@@ -97,6 +101,7 @@ export const WORKLIST_TOMORROW_MOCK: WorklistAppointment[] = [
     patientName: 'Matt Newman',
     patientId: '240545-123Y',
     appointmentType: 'In-person visit',
+    patientMessage: 'I will bring my previous imaging reports to the appointment.',
   },
   {
     id: 't2',
@@ -104,6 +109,7 @@ export const WORKLIST_TOMORROW_MOCK: WorklistAppointment[] = [
     patientName: 'Karl Lake',
     patientId: '240545-123Y',
     appointmentType: 'Telehealth visit',
+    patientMessage: 'Please call me if the visit needs to be rescheduled.',
   },
 ];
 

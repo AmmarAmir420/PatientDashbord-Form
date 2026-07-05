@@ -6,10 +6,13 @@ export const UI_COPY = {
   calendar: 'Calendar',
   yesterdayList: "Yesterday's list",
   tomorrowList: "Tomorrow's list",
+  yesterdayListShort: 'Yesterday',
+  tomorrowListShort: 'Tomorrow',
   notes: 'Notes',
   recentPatients: 'Recent patients',
   noAppointments: 'No appointments match your search.',
   createEvent: 'Create event',
+  updateEvent: 'Update event',
   close: 'Close',
 } as const;
 

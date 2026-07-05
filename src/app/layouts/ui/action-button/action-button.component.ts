@@ -8,8 +8,8 @@ export type ActionButtonVariant = 'navy' | 'primary' | 'light';
   template: `
     <button
       type="button"
-      class="cursor-pointer whitespace-nowrap rounded-md border-none px-3.5 py-2 text-[13px] font-medium text-white transition-[filter] hover:brightness-105"
-      [class]="variantClasses()"
+      class="cursor-pointer rounded-md border-none px-3.5 py-2 text-[13px] font-medium text-white transition-[filter] hover:brightness-105"
+      [class]="buttonClasses()"
       (click)="pressed.emit()"
     >
       {{ label() }}
@@ -19,14 +19,20 @@ export type ActionButtonVariant = 'navy' | 'primary' | 'light';
 export class ActionButtonComponent {
   readonly label = input.required<string>();
   readonly variant = input<ActionButtonVariant>('primary');
+  readonly fullWidth = input(false);
   readonly pressed = output<void>();
 
-  variantClasses(): string {
+  buttonClasses(): string {
     const map: Record<ActionButtonVariant, string> = {
       navy: 'bg-brand-navy',
       primary: 'bg-brand-primary',
       light: 'bg-brand-sky',
     };
-    return map[this.variant()];
+
+    const width = this.fullWidth()
+      ? 'w-full min-w-0 whitespace-normal text-center xl:w-auto xl:whitespace-nowrap'
+      : 'min-w-0 max-w-full whitespace-normal xl:whitespace-nowrap';
+
+    return `${map[this.variant()]} ${width}`;
   }
 }

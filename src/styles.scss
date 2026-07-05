@@ -35,6 +35,13 @@ body {
   background-color: var(--color-page);
   color: #111827;
   -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+
+app-root {
+  display: block;
+  min-height: 100%;
+  overflow-x: clip;
 }
 
 .mat-icon {
@@ -63,6 +70,23 @@ body {
   display: none;
 }
 
+.app-form-field {
+  width: 100%;
+
+  .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
+}
+
+.app-form-field .mat-mdc-form-field-icon-prefix {
+  padding-right: 8px;
+  color: #9ca3af;
+}
+
+.visit-textarea-field .mat-mdc-text-field-wrapper {
+  align-items: flex-start;
+}
+
 .app-material-field .mdc-notched-outline__leading,
 .app-material-field .mdc-notched-outline__notch,
 .app-material-field .mdc-notched-outline__trailing {
@@ -89,4 +113,15 @@ body {
   color: #fff;
   font-size: 11px;
   font-weight: 600;
+}
+
+@media (max-width: 639px) {
+  .mat-datepicker-content,
+  .mat-mdc-menu-panel {
+    max-width: calc(100vw - 1.5rem);
+  }
+
+  .mat-datepicker-content .mat-calendar {
+    width: min(100%, 320px);
+  }
 }

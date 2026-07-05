@@ -6,6 +6,7 @@ import { APP_ROUTES, SNACKBAR_DURATION_MS } from '../constants';
 import {
   ProfileMenuAction,
   ShortcutAction,
+  VisitStatus,
   WorklistDay,
 } from '../../shared/enums';
 import {
@@ -14,7 +15,8 @@ import {
   WORKLIST_TODAY_MOCK,
   WORKLIST_TOMORROW_MOCK,
   WORKLIST_YESTERDAY_MOCK,
-} from '../../shared/data/mocks/dashboard.mock';
+} from '../data/mocks';
+import { PATIENT_VISIT_CONTEXT_MOCK } from '../data/mocks/patient-visit.mock';
 import {
   PatientVisitFormModel,
   PatientVisitPrefill,
@@ -22,7 +24,7 @@ import {
   RecentPatient,
   StickyNote,
   WorklistAppointment,
-} from '../../shared/models';
+} from '../../shared/interfaces';
 
 @Injectable({ providedIn: 'root' })
 export class HealthcareStoreService {
@@ -43,6 +45,7 @@ export class HealthcareStoreService {
     new Set(WORKLIST_TODAY_MOCK.filter((item) => item.expanded).map((item) => item.id)),
   );
   readonly createdVisits = signal<PatientVisitRecord[]>([]);
+  private readonly recentPatientsState = signal<RecentPatient[]>([...RECENT_PATIENTS_MOCK]);
 
   readonly worklistAppointments = computed(() =>
     this.filterAppointments(this.worklists[this.worklistDay()]),
@@ -50,11 +53,13 @@ export class HealthcareStoreService {
 
   readonly recentPatients = computed(() => {
     const query = this.globalSearch().trim().toLowerCase();
+    const patients = this.recentPatientsState();
+
     if (!query) {
-      return RECENT_PATIENTS_MOCK;
+      return patients;
     }
 
-    return RECENT_PATIENTS_MOCK.filter(
+    return patients.filter(
       (patient) =>
         patient.name.toLowerCase().includes(query) ||
         patient.personalId.toLowerCase().includes(query),
@@ -85,7 +90,7 @@ export class HealthcareStoreService {
 
   setExpanded(id: string, expanded: boolean): void {
     this.expandedIds.update((current) => {
-      const next = new Set(current);
+      const next = expanded ? new Set<string>() : new Set(current);
       if (expanded) {
         next.add(id);
       } else {
@@ -116,10 +121,71 @@ export class HealthcareStoreService {
   }
 
   openRecentPatient(patient: RecentPatient): void {
-    this.openPatientVisitForm({
-      fullName: patient.name,
-      patientId: patient.personalId,
+    this.router.navigate([APP_ROUTES.patientVisitNew], {
+      queryParams: {
+        mode: 'view',
+        visitId: patient.id,
+        fullName: patient.name,
+        patientId: patient.personalId,
+      },
     });
+  }
+
+  getPatientVisitViewModel(patientId: string, fullName: string): PatientVisitFormModel {
+    const existing = this.createdVisits().find((visit) => visit.patientId === patientId);
+    if (existing) {
+      return existing;
+    }
+
+    return {
+      fullName,
+      patientId,
+      dateOfBirth: '15/03/1985',
+      eventType: 'Follow-up visit',
+      visitReasons: 'Routine check-up',
+      status: VisitStatus.Ready,
+      additionalNotes: 'Existing patient record loaded for review.',
+      appointmentDateTime: PATIENT_VISIT_CONTEXT_MOCK.timestamp,
+    };
+  }
+
+  updateVisit(id: string, value: PatientVisitFormModel): PatientVisitRecord | undefined {
+    let updated: PatientVisitRecord | undefined;
+
+    this.createdVisits.update((current) =>
+      current.map((visit) => {
+        if (visit.id !== id) {
+          return visit;
+        }
+
+        updated = { ...visit, ...value };
+        return updated;
+      }),
+    );
+
+    if (updated) {
+      this.prependRecentPatient({
+        id: updated.id,
+        name: updated.fullName,
+        personalId: updated.patientId,
+      });
+    }
+
+    return updated;
+  }
+
+  saveVisit(value: PatientVisitFormModel, visitId?: string | null): PatientVisitRecord {
+    const existingById = visitId
+      ? this.createdVisits().find((visit) => visit.id === visitId)
+      : undefined;
+    const existingByPatient = this.createdVisits().find((visit) => visit.patientId === value.patientId);
+    const existing = existingById ?? existingByPatient;
+
+    if (existing) {
+      return this.updateVisit(existing.id, value) ?? existing;
+    }
+
+    return this.createVisit(value);
   }
 
   openClinicalAction(eventType: string): void {
@@ -174,7 +240,7 @@ export class HealthcareStoreService {
         this.notify('Settings saved locally for this session.');
         break;
       case ProfileMenuAction.Admin:
-        this.notify('Admin panel access is disabled in this demo.');
+        this.openPatientVisitForm();
         break;
       case ProfileMenuAction.Logout:
         this.globalSearch.set('');
@@ -223,7 +289,19 @@ export class HealthcareStoreService {
     };
 
     this.createdVisits.update((current) => [visit, ...current]);
+    this.prependRecentPatient({
+      id: visit.id,
+      name: visit.fullName,
+      personalId: visit.patientId,
+    });
     return visit;
+  }
+
+  private prependRecentPatient(patient: RecentPatient): void {
+    this.recentPatientsState.update((current) => [
+      patient,
+      ...current.filter((entry) => entry.personalId !== patient.personalId),
+    ]);
   }
 
   private filterAppointments(appointments: WorklistAppointment[]): WorklistAppointment[] {

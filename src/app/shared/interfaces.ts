@@ -1,6 +1,6 @@
-import { ProfileMenuAction } from '../enums/profile-menu-action.enum';
-import { ShortcutAction } from '../enums/shortcut-action.enum';
-import { VisitStatus } from '../enums/visit-status.enum';
+import { ProfileMenuAction } from './enums/profile-menu-action.enum';
+import { ShortcutAction } from './enums/shortcut-action.enum';
+import { VisitStatus } from './enums/visit-status.enum';
 
 export interface UserProfile {
   fullName: string;
@@ -63,6 +63,7 @@ export interface PatientVisitFormModel {
   visitReasons: string;
   status: VisitStatus;
   additionalNotes: string;
+  appointmentDateTime: string;
 }
 
 export interface PatientVisitPrefill {

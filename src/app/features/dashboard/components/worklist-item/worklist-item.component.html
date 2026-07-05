@@ -1,5 +1,5 @@
 <div class="border-b border-gray-200 last:border-b-0">
-  <div class="flex min-h-14 flex-wrap items-center gap-3 px-4 py-3.5">
+  <div class="flex min-h-14 flex-wrap items-start gap-2 px-3 py-3 sm:items-center sm:gap-3 sm:px-4 sm:py-3.5">
     <button
       type="button"
       class="inline-flex size-7 shrink-0 cursor-pointer items-center justify-center border-none bg-transparent text-gray-500"
@@ -7,32 +7,49 @@
       [attr.aria-expanded]="expanded()"
       [attr.aria-label]="expanded() ? 'Close message' : 'Open message'"
     >
-      <mat-icon class="!size-5 !text-[20px]">{{ expanded() ? 'remove' : 'add' }}</mat-icon>
+      <mat-icon class="size-5 text-[20px]">{{ expanded() ? 'remove' : 'add' }}</mat-icon>
     </button>
 
-    <div class="min-w-0 flex-1 truncate text-sm text-gray-900">
-      <span class="font-medium">{{ appointment().time }}</span>
-      <span class="mx-1.5 text-gray-400">-</span>
-      <span>{{ appointment().patientName }}</span>
-      <span class="mx-1.5 text-gray-400">-</span>
-      <span class="text-gray-600">{{ appointment().patientId }}</span>
-      <span class="mx-1.5 text-gray-400">|</span>
-      <span class="text-gray-600">{{ appointment().appointmentType }}</span>
+    <div class="min-w-0 flex-1 text-sm leading-relaxed text-gray-900">
+      <div class="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5 xl:truncate xl:leading-normal">
+        <span class="font-medium">{{ appointment().time }}</span>
+        <span class="text-gray-400">-</span>
+        <span class="break-words">{{ appointment().patientName }}</span>
+        <span class="text-gray-400">-</span>
+        <span class="text-gray-600">{{ appointment().patientId }}</span>
+        <span class="hidden text-gray-400 min-[480px]:inline">|</span>
+        <span class="basis-full text-gray-600 min-[480px]:basis-auto">{{ appointment().appointmentType }}</span>
+      </div>
     </div>
 
-    <div class="flex shrink-0 flex-wrap gap-2 pl-10 md:pl-0">
+    <div
+      class="grid w-full basis-full grid-cols-1 gap-2 pl-9 min-[480px]:grid-cols-2 xl:flex xl:w-auto xl:basis-auto xl:flex-wrap xl:pl-0"
+    >
       <app-action-button
         label="Open telehealth visit"
         variant="navy"
+        [fullWidth]="true"
         (pressed)="openTelehealthVisit()"
       />
-      <app-action-button label="Open patient" variant="primary" (pressed)="openPatient()" />
-      <app-action-button label="Messages" variant="light" (pressed)="openMessages()" />
+      <app-action-button
+        label="Open patient"
+        variant="primary"
+        [fullWidth]="true"
+        (pressed)="openPatient()"
+      />
+      <app-action-button
+        label="Messages"
+        variant="light"
+        [fullWidth]="true"
+        (pressed)="openMessages()"
+      />
     </div>
   </div>
 
   @if (expanded() && appointment().patientMessage) {
-    <div class="mb-4 ml-14 mr-4 rounded-[10px] border-l-[3px] border-blue-300 bg-gray-100 px-4 py-3.5">
+    <div
+      class="mb-4 ml-10 mr-3 rounded-[10px] border-l-[3px] border-blue-300 bg-gray-100 px-3 py-3 sm:ml-14 sm:mr-4 sm:px-4 sm:py-3.5"
+    >
       <p class="m-0 text-sm leading-relaxed text-gray-700">{{ appointment().patientMessage }}</p>
     </div>
   }

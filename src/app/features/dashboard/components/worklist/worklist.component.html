@@ -1,40 +1,42 @@
 <app-ui-card padding="none" [overflowHidden]="true">
-  <div class="px-5 pb-3 pt-5">
+  <div class="px-4 pb-3 pt-4 sm:px-5 sm:pt-5">
     <app-section-header [title]="worklistDayLabel[store.worklistDay()]">
       <button
         actions
         type="button"
-        class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border-none bg-blue-50 px-3.5 py-2 text-[13px] font-medium text-brand-primary"
+        class="inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border-none bg-blue-50 px-2.5 py-2 text-[13px] font-medium text-brand-primary sm:px-3.5"
         (click)="openCalendar()"
       >
-        <mat-icon class="!size-[18px] !text-[18px]">calendar_month</mat-icon>
-        {{ copy.calendar }}
+        <mat-icon class="size-[18px] text-[18px]">calendar_month</mat-icon>
+        <span class="hidden sm:inline">{{ copy.calendar }}</span>
       </button>
     </app-section-header>
   </div>
 
-  <nav class="flex justify-between border-b border-gray-200 px-5 pb-3">
+  <nav class="flex flex-wrap justify-between gap-2 border-b border-gray-200 px-4 pb-3 sm:px-5">
     <button
       type="button"
-      class="cursor-pointer border-none bg-transparent p-0 text-[13px] text-gray-500 hover:text-brand-primary disabled:cursor-default disabled:opacity-40"
+      class="cursor-pointer border-none bg-transparent p-0 text-xs text-gray-500 hover:text-brand-primary disabled:cursor-default disabled:opacity-40 sm:text-[13px]"
       [disabled]="store.worklistDay() === WorklistDay.Yesterday"
       (click)="showPreviousList()"
     >
-      &lt; {{ copy.yesterdayList }}
+      &lt; <span class="sm:hidden">{{ copy.yesterdayListShort }}</span
+      ><span class="hidden sm:inline">{{ copy.yesterdayList }}</span>
     </button>
     <button
       type="button"
-      class="cursor-pointer border-none bg-transparent p-0 text-[13px] text-gray-500 hover:text-brand-primary disabled:cursor-default disabled:opacity-40"
+      class="cursor-pointer border-none bg-transparent p-0 text-xs text-gray-500 hover:text-brand-primary disabled:cursor-default disabled:opacity-40 sm:text-[13px]"
       [disabled]="store.worklistDay() === WorklistDay.Tomorrow"
       (click)="showNextList()"
     >
-      {{ copy.tomorrowList }} &gt;
+      <span class="sm:hidden">{{ copy.tomorrowListShort }}</span
+      ><span class="hidden sm:inline">{{ copy.tomorrowList }}</span> &gt;
     </button>
   </nav>
 
   <div>
     @if (store.worklistAppointments().length === 0) {
-      <p class="m-0 px-5 py-6 text-center text-sm text-gray-500">{{ copy.noAppointments }}</p>
+      <p class="m-0 px-4 py-6 text-center text-sm text-gray-500 sm:px-5">{{ copy.noAppointments }}</p>
     } @else {
       @for (appointment of store.worklistAppointments(); track appointment.id) {
         <app-worklist-item

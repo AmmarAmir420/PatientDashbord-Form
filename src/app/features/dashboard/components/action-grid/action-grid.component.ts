@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 
 import { HealthcareStoreService } from '../../../../core/services/healthcare-store.service';
-import { CLINICAL_ACTIONS_MOCK } from '../../../../shared/data/mocks/dashboard.mock';
+import { CLINICAL_ACTIONS_MOCK } from '../../../../core/data/mocks';
 import { IconTileButtonComponent, UiCardComponent } from '../../../../layouts/ui';
-import { ClinicalAction } from '../../../../shared/models';
+import { ClinicalAction } from '../../../../shared/interfaces';
 
 @Component({
   selector: 'app-action-grid',

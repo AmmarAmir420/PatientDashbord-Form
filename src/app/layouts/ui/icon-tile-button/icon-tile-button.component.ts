@@ -9,7 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
   template: `
     <button
       type="button"
-      class="flex min-w-[72px] flex-1 cursor-pointer flex-col items-center gap-2.5 border-none bg-transparent p-1"
+      class="flex w-full min-w-0 cursor-pointer flex-col items-center gap-2 border-none bg-transparent p-1 sm:min-w-[72px] sm:gap-2.5 lg:flex-1"
       [attr.aria-label]="label() || icon()"
       (click)="pressed.emit()"
     >
@@ -24,7 +24,7 @@ import { MatIconModule } from '@angular/material/icon';
         <mat-icon [class]="iconClasses()">{{ icon() }}</mat-icon>
       </span>
       @if (label()) {
-        <span class="max-w-[100px] text-center text-xs leading-snug text-gray-700">{{ label() }}</span>
+        <span class="max-w-full px-0.5 text-center text-[11px] leading-snug text-gray-700 sm:max-w-[100px] sm:text-xs">{{ label() }}</span>
       }
     </button>
   `,
@@ -38,8 +38,8 @@ export class IconTileButtonComponent {
 
   iconWrapClasses(): string {
     return this.large()
-      ? 'size-[72px] rounded-[14px] border border-dashed border-gray-300'
-      : 'size-14';
+      ? 'size-16 rounded-[14px] border border-dashed border-gray-300 sm:size-[72px]'
+      : 'size-12 sm:size-14';
   }
 
   iconClasses(): string {

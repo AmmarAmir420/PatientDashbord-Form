@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { UI_COPY } from '../../../../core/constants';
 import { HealthcareStoreService } from '../../../../core/services/healthcare-store.service';
 import { SearchInputComponent, UiCardComponent } from '../../../../layouts/ui';
-import { RecentPatient } from '../../../../shared/models';
+import { RecentPatient } from '../../../../shared/interfaces';
 
 @Component({
   selector: 'app-recent-patients',

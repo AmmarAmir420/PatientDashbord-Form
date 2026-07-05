@@ -2,9 +2,9 @@ import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/c
 
 import { HealthcareStoreService } from '../../../../core/services/healthcare-store.service';
 import { ShortcutAction } from '../../../../shared/enums';
-import { QUICK_SHORTCUTS_MOCK } from '../../../../shared/data/mocks/dashboard.mock';
+import { QUICK_SHORTCUTS_MOCK } from '../../../../core/data/mocks';
 import { IconTileButtonComponent } from '../../../../layouts/ui';
-import { QuickShortcut } from '../../../../shared/models';
+import { QuickShortcut } from '../../../../shared/interfaces';
 
 @Component({
   selector: 'app-quick-shortcuts',

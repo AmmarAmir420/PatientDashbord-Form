@@ -7,9 +7,9 @@ import { HealthcareStoreService } from '../../core/services/healthcare-store.ser
 import {
   CURRENT_USER_MOCK,
   PROFILE_MENU_ITEMS_MOCK,
-} from '../../shared/data/mocks/dashboard.mock';
+} from '../../core/data/mocks';
 import { ProfileMenuAction } from '../../shared/enums';
-import { UserProfile } from '../../shared/models';
+import { UserProfile } from '../../shared/interfaces';
 import { AvatarComponent } from '../ui/avatar/avatar.component';
 import { IconButtonComponent } from '../ui/buttons/app-buttons.component';
 import { SearchInputComponent } from '../ui/search-input/search-input.component';
@@ -25,7 +25,7 @@ import { SearchInputComponent } from '../ui/search-input/search-input.component'
     SearchInputComponent,
   ],
   templateUrl: './app-header.component.html',
-  host: { class: 'block border-b border-gray-200 bg-white' },
+  host: { class: 'sticky top-0 z-40 block border-b border-gray-200 bg-white' },
 })
 export class AppHeaderComponent {
   private readonly store = inject(HealthcareStoreService);

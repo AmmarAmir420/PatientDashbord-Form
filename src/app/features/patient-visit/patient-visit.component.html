@@ -1,63 +1,122 @@
 <app-main-layout>
-  <div class="mx-auto max-w-[900px] py-4 md:py-8">
+  <div class="mx-auto w-full max-w-[900px] py-4 sm:py-8">
     <app-ui-card padding="lg" class="shadow-md">
       <header
         class="mb-6 flex flex-col gap-3 border-b border-gray-200 pb-6 sm:flex-row sm:items-start sm:justify-between"
       >
-        <p class="m-0 text-sm font-medium leading-snug text-gray-900">{{ context.providerLine }}</p>
-        <div class="inline-flex shrink-0 items-center gap-1.5 text-sm text-gray-500">
-          <span>{{ context.timestamp }}</span>
-          <button type="button" class="border-none bg-transparent p-0 text-gray-400" aria-label="Edit timestamp">
-            <mat-icon class="size-[18px] text-[18px]">edit</mat-icon>
-          </button>
+        <p class="m-0 min-w-0 flex-1 break-words text-sm font-medium leading-snug text-gray-900">
+          {{ context.providerLine }}
+        </p>
+        <div class="inline-flex shrink-0 flex-wrap items-center gap-1.5 text-sm text-gray-500">
+          <span>{{ headerTimestamp() }}</span>
+          @if (isFormEditable()) {
+            <button
+              type="button"
+              class="inline-flex border-none bg-transparent p-0 text-gray-400"
+              aria-label="Edit timestamp"
+            >
+              <mat-icon class="size-[18px] text-[18px]">edit</mat-icon>
+            </button>
+          }
         </div>
       </header>
 
-      <form class="flex flex-col gap-5" [formGroup]="form" (ngSubmit)="createVisit()">
-        <app-form-field
-          label="Patient full name"
-          inputId="fullName"
-          [errorMessage]="isInvalid('fullName') ? 'Patient full name is required.' : ''"
-        >
-          <input matInput id="fullName" formControlName="fullName" />
-        </app-form-field>
-
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <app-form-field label="Date of birth" inputId="dateOfBirth">
-            <input matInput id="dateOfBirth" formControlName="dateOfBirth" />
-          </app-form-field>
-
-          <app-form-field
-            label="Patient ID"
-            inputId="patientId"
-            [errorMessage]="isInvalid('patientId') ? 'Patient ID is required.' : ''"
-          >
-            <input matInput id="patientId" formControlName="patientId" />
-          </app-form-field>
+      <form class="flex flex-col gap-5" [formGroup]="form" (ngSubmit)="submitForm()">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[13px] font-semibold text-gray-700" for="fullName">Patient full name</label>
+          <mat-form-field appearance="outline" class="app-form-field" subscriptSizing="dynamic">
+            <input matInput id="fullName" formControlName="fullName" [readonly]="!isFormEditable()" />
+          </mat-form-field>
+          @if (isInvalid('fullName')) {
+            <span class="text-xs text-red-600" role="alert">Patient full name is required.</span>
+          }
         </div>
 
-        <app-form-field
-          label="Event type"
-          inputId="eventType"
-          [errorMessage]="isInvalid('eventType') ? 'Event type is required.' : ''"
-        >
-          <mat-icon matPrefix class="text-gray-400">search</mat-icon>
-          <input matInput id="eventType" formControlName="eventType" placeholder="Event type..." />
-          <app-icon-button matSuffix size="sm" ariaLabel="Voice input">
-            <mat-icon class="size-5 text-[20px]">mic</mat-icon>
-          </app-icon-button>
-        </app-form-field>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[13px] font-semibold text-gray-700" for="dateOfBirth">Date of birth</label>
+            <mat-form-field appearance="outline" class="app-form-field" subscriptSizing="dynamic">
+              <input
+                matInput
+                id="dateOfBirth"
+                formControlName="dateOfBirth"
+                [matDatepicker]="birthDatePicker"
+                [max]="maxBirthDate"
+                [matDatepickerFilter]="birthDateFilter"
+                placeholder="dd/MM/yyyy"
+                autocomplete="bday"
+                [readonly]="!isFormEditable()"
+              />
+              @if (isFormEditable()) {
+                <mat-datepicker-toggle matIconSuffix [for]="birthDatePicker" />
+              }
+              <mat-datepicker #birthDatePicker startView="multi-year" />
+            </mat-form-field>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[13px] font-semibold text-gray-700" for="patientId">Patient ID</label>
+            <mat-form-field appearance="outline" class="app-form-field" subscriptSizing="dynamic">
+              <input matInput id="patientId" formControlName="patientId" [readonly]="!isFormEditable()" />
+            </mat-form-field>
+            @if (isInvalid('patientId')) {
+              <span class="text-xs text-red-600" role="alert">Patient ID is required.</span>
+            }
+          </div>
+        </div>
 
-        <app-form-field label="Reasons for visit" inputId="visitReasons">
-          <input matInput id="visitReasons" formControlName="visitReasons" placeholder="Reasons for visit..." />
-          <app-icon-button matSuffix size="sm" ariaLabel="Voice input">
-            <mat-icon class="size-5 text-[20px]">mic</mat-icon>
-          </app-icon-button>
-        </app-form-field>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[13px] font-semibold text-gray-700" for="eventType">Event type</label>
+          <mat-form-field appearance="outline" class="app-form-field" subscriptSizing="dynamic">
+            <mat-icon matPrefix class="text-gray-400">search</mat-icon>
+            <input
+              matInput
+              id="eventType"
+              formControlName="eventType"
+              placeholder="Event type..."
+              [readonly]="!isFormEditable()"
+            />
+            @if (isFormEditable()) {
+              <button
+                matSuffix
+                type="button"
+                class="inline-flex border-none bg-transparent p-0 text-gray-400"
+                aria-label="Voice input"
+              >
+                <mat-icon class="size-5 text-[20px]">mic</mat-icon>
+              </button>
+            }
+          </mat-form-field>
+          @if (isInvalid('eventType')) {
+            <span class="text-xs text-red-600" role="alert">Event type is required.</span>
+          }
+        </div>
 
-        <fieldset class="m-0 border-none p-0">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[13px] font-semibold text-gray-700" for="visitReasons">Reasons for visit</label>
+          <mat-form-field appearance="outline" class="app-form-field" subscriptSizing="dynamic">
+            <input
+              matInput
+              id="visitReasons"
+              formControlName="visitReasons"
+              placeholder="Reasons for visit..."
+              [readonly]="!isFormEditable()"
+            />
+            @if (isFormEditable()) {
+              <button
+                matSuffix
+                type="button"
+                class="inline-flex border-none bg-transparent p-0 text-gray-400"
+                aria-label="Voice input"
+              >
+                <mat-icon class="size-5 text-[20px]">mic</mat-icon>
+              </button>
+            }
+          </mat-form-field>
+        </div>
+
+        <fieldset class="m-0 border-none p-0" [disabled]="!isFormEditable()">
           <legend class="mb-2 text-[13px] font-semibold text-gray-700">Status</legend>
-          <mat-radio-group formControlName="status" class="flex flex-wrap gap-5">
+          <mat-radio-group formControlName="status" class="flex flex-col gap-3 min-[420px]:flex-row min-[420px]:flex-wrap min-[420px]:gap-5">
             <mat-radio-button [value]="VisitStatus.Draft">Draft</mat-radio-button>
             <mat-radio-button [value]="VisitStatus.Ready">Ready</mat-radio-button>
             <mat-radio-button [value]="VisitStatus.Approved">Approved</mat-radio-button>
@@ -66,20 +125,64 @@
 
         <app-label-value-row label="Doctor:">{{ context.doctorName }}</app-label-value-row>
 
-        <app-label-value-row label="Appointment date and time:" [editable]="true" editAriaLabel="Edit appointment time">
-          {{ context.timestamp }}
-        </app-label-value-row>
+        <div
+          class="flex flex-col gap-2 border-b border-gray-100 py-3 md:flex-row md:items-center md:justify-between md:gap-4"
+        >
+          <span class="shrink-0 text-[13px] font-semibold text-gray-700">Appointment date and time:</span>
+          <div class="flex w-full min-w-0 flex-col gap-2 md:w-auto md:flex-row md:items-start">
+            <mat-form-field appearance="outline" class="app-form-field w-full min-w-0 md:min-w-[180px]" subscriptSizing="dynamic">
+              <input
+                matInput
+                formControlName="appointmentAt"
+                [matDatepicker]="appointmentDatePicker"
+                placeholder="dd/MM/yyyy"
+                autocomplete="off"
+                [readonly]="!isFormEditable()"
+              />
+              @if (isFormEditable()) {
+                <mat-datepicker-toggle matIconSuffix [for]="appointmentDatePicker" />
+              }
+              <mat-datepicker #appointmentDatePicker />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="app-form-field w-full min-w-0 md:w-32" subscriptSizing="dynamic">
+              <input
+                matInput
+                type="time"
+                [value]="appointmentTimeValue()"
+                [disabled]="!isFormEditable()"
+                (input)="onAppointmentTimeChange($any($event.target).value)"
+                aria-label="Appointment time"
+              />
+            </mat-form-field>
+          </div>
+        </div>
 
-        <app-form-field label="Additional notes" inputId="additionalNotes">
-          <textarea matInput id="additionalNotes" formControlName="additionalNotes" rows="5"></textarea>
-          <app-icon-button matSuffix size="sm" ariaLabel="Voice input">
-            <mat-icon class="size-5 text-[20px]">mic</mat-icon>
-          </app-icon-button>
-        </app-form-field>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[13px] font-semibold text-gray-700" for="additionalNotes">Additional notes</label>
+          <mat-form-field appearance="outline" class="app-form-field visit-textarea-field" subscriptSizing="dynamic">
+            <textarea
+              matInput
+              id="additionalNotes"
+              formControlName="additionalNotes"
+              rows="5"
+              [readonly]="!isFormEditable()"
+            ></textarea>
+            @if (isFormEditable()) {
+              <button
+                matSuffix
+                type="button"
+                class="mt-2 inline-flex border-none bg-transparent p-0 text-gray-400"
+                aria-label="Voice input"
+              >
+                <mat-icon class="size-5 text-[20px]">mic</mat-icon>
+              </button>
+            }
+          </mat-form-field>
+        </div>
 
-        <footer class="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
-          <app-secondary-button (pressed)="close()">{{ copy.close }}</app-secondary-button>
-          <app-primary-button type="submit">{{ copy.createEvent }}</app-primary-button>
+        <footer class="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
+          <app-primary-button type="submit" class="order-1 sm:order-2">{{ primaryActionLabel() }}</app-primary-button>
+          <app-secondary-button class="order-2 sm:order-1" (pressed)="close()">{{ copy.close }}</app-secondary-button>
         </footer>
       </form>
     </app-ui-card>

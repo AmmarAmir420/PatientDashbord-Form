@@ -3,7 +3,7 @@ import { MatIconModule } from '@angular/material/icon';
 
 import { HealthcareStoreService } from '../../../../core/services/healthcare-store.service';
 import { ActionButtonComponent } from '../../../../layouts/ui';
-import { WorklistAppointment } from '../../../../shared/models';
+import { WorklistAppointment } from '../../../../shared/interfaces';
 
 @Component({
   selector: 'app-worklist-item',
@@ -22,12 +22,12 @@ export class WorklistItemComponent {
     this.expandedChange.emit(!this.expanded());
   }
 
-  openTelehealthVisit(): void {
-    this.store.openTelehealthVisit(this.appointment());
-  }
-
   openPatient(): void {
     this.store.openPatient(this.appointment());
+  }
+
+  openTelehealthVisit(): void {
+    this.store.openTelehealthVisit(this.appointment());
   }
 
   openMessages(): void {

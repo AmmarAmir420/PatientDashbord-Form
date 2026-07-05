@@ -6,7 +6,7 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
   template: `
     <button
       [type]="type()"
-      class="inline-flex h-[42px] cursor-pointer items-center justify-center rounded-lg border-none bg-brand-primary px-6 text-sm font-medium text-white transition-[filter] hover:brightness-105"
+      class="inline-flex h-[42px] w-full cursor-pointer items-center justify-center rounded-lg border-none bg-brand-primary px-6 text-sm font-medium text-white transition-[filter] hover:brightness-105 sm:w-auto"
       (click)="pressed.emit()"
     >
       <ng-content />
@@ -24,7 +24,7 @@ export class PrimaryButtonComponent {
   template: `
     <button
       type="button"
-      class="inline-flex h-[42px] cursor-pointer items-center justify-center rounded-lg border border-gray-300 bg-gray-50 px-6 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100"
+      class="inline-flex h-[42px] w-full cursor-pointer items-center justify-center rounded-lg border border-gray-300 bg-gray-50 px-6 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 sm:w-auto"
       (click)="pressed.emit()"
     >
       <ng-content />
